@@ -1,0 +1,38 @@
+{
+  "name": "overpass",
+  "description": "Overpass for Node.js",
+  "version": "0.0.0",
+  "homepage": "https://github.com/eloquent/overpass-nodejs",
+  "author": "Erin Millard",
+  "keywords": [],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/eloquent/overpass-nodejs.git"
+  },
+  "bugs": {
+    "url": "https://github.com/eloquent/overpass-nodejs/issues"
+  },
+  "directories": {
+    "lib": "./lib"
+  },
+  "scripts": {
+    "test": "jasmine-node --coffee spec"
+  },
+  "engines": {
+    "node": "^0.10",
+    "npm": "^2.1"
+  },
+  "dependencies": {
+    "amqp": "^0.2"
+  },
+  "devDependencies": {
+    "coffee-script": "^1.8",
+    "jasmine-node": "^1.14"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://raw.github.com/eloquent/overpass-nodejs/develop/LICENSE"
+    }
+  ]
+}
