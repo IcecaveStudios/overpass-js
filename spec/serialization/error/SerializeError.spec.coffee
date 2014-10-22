@@ -1,7 +1,7 @@
-requireHelper = require '../require-helper'
+requireHelper = require '../../require-helper'
 SerializeError = requireHelper 'serialization/error/SerializeError'
 
-describe 'SerializeError', ->
+describe 'serialization.error.SerializeError', ->
   beforeEach ->
     @subject = new SerializeError()
 

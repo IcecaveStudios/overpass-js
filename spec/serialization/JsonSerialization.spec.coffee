@@ -1,7 +1,7 @@
 requireHelper = require '../require-helper'
 JsonSerialization = requireHelper 'serialization/JsonSerialization'
 
-describe 'JsonSerialization', ->
+describe 'serialization.JsonSerialization', ->
   beforeEach ->
     @subject = new JsonSerialization()
 
