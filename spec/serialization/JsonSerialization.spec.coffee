@@ -1,4 +1,5 @@
-JsonSerialization = require '../../src/serialization/JsonSerialization'
+requireHelper = require '../require-helper'
+JsonSerialization = requireHelper 'serialization/JsonSerialization'
 
 describe 'JsonSerialization', ->
   beforeEach ->

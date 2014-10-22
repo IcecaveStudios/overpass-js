@@ -28,7 +28,11 @@
   "devDependencies": {
     "coffee-script": "^1.8",
     "grunt": "^0.4",
-    "grunt-cli": "^0.1.13",
+    "grunt-cli": "^0.1",
+    "grunt-contrib-coffee": "^0.12",
+    "grunt-coveralls": "^1.0",
+    "grunt-env": "^0.4.2",
+    "grunt-istanbul": "^0.3",
     "grunt-jasmine-node": "^0.2"
   },
   "licenses": [
