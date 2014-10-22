@@ -1,0 +1,10 @@
+{
+  "version": 3,
+  "file": "UnserializeError.js",
+  "sourceRoot": "../../../src/serialization/error/",
+  "sources": [
+    "UnserializeError.coffee"
+  ],
+  "names": [],
+  "mappings": "AAAA;AAAA,MAAA,gBAAA;IAAA;mSAAA;;AAAA,EAAA,MAAM,CAAC,OAAP,GAAuB;AACrB,uCAAA,CAAA;;AAAa,IAAA,0BAAC,KAAD,GAAA;AACX,MAAA,IAAC,CAAA,OAAD,GAAW,gCAAX,CAAA;AAAA,MACA,IAAC,CAAA,KAAD,GAAS,KADT,CADW;IAAA,CAAb;;4BAAA;;KAD8C,MAAhD,CAAA;AAAA"
+}

@@ -1,4 +1,5 @@
 SerializeError = require './error/SerializeError'
+UnserializeError = require './error/UnserializeError'
 
 module.exports = class JsonSerialization
   serialize: (payload) ->
@@ -8,3 +9,11 @@ module.exports = class JsonSerialization
     throw new SerializeError() if type not in ['object', 'boolean', 'number', 'string']
 
     JSON.stringify payload
+
+  unserialize: (buffer) ->
+    throw new UnserializeError() if typeof buffer isnt 'string'
+
+    try
+      JSON.parse buffer
+    catch e
+      throw new UnserializeError(e)

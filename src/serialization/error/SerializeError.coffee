@@ -1,3 +1,4 @@
 module.exports = class SerializeError extends Error
-  constructor: ->
+  constructor: (cause) ->
     @message = 'Could not serialize payload.'
+    @cause = cause
