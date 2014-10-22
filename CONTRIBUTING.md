@@ -21,7 +21,3 @@ As a guideline, please follow this process:
 ## Running the test suite
 
     npm test
-
-or
-
-    make test

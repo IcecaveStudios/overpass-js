@@ -16,7 +16,7 @@
     "lib": "./lib"
   },
   "scripts": {
-    "test": "jasmine-node --coffee spec"
+    "test": "grunt test"
   },
   "engines": {
     "node": "^0.10",
@@ -27,7 +27,9 @@
   },
   "devDependencies": {
     "coffee-script": "^1.8",
-    "jasmine-node": "^1.14"
+    "grunt": "^0.4",
+    "grunt-cli": "^0.1.13",
+    "grunt-jasmine-node": "^0.2"
   },
   "licenses": [
     {
