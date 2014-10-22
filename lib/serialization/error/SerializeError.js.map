@@ -1,0 +1,10 @@
+{
+  "version": 3,
+  "file": "SerializeError.js",
+  "sourceRoot": "../../../src/serialization/error/",
+  "sources": [
+    "SerializeError.coffee"
+  ],
+  "names": [],
+  "mappings": "AAAA;AAAA,MAAA,cAAA;IAAA;mSAAA;;AAAA,EAAA,MAAM,CAAC,OAAP,GAAuB;AACrB,qCAAA,CAAA;;AAAa,IAAA,wBAAA,GAAA;AACX,MAAA,IAAC,CAAA,OAAD,GAAW,8BAAX,CADW;IAAA,CAAb;;0BAAA;;KAD4C,MAA9C,CAAA;AAAA"
+}

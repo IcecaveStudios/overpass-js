@@ -7,6 +7,8 @@ module.exports = (grunt) ->
         dest: 'lib'
         ext: '.js'
         expand: true
+        options:
+          sourceMap: true
 
     env:
       coverage:

@@ -1,0 +1,10 @@
+{
+  "version": 3,
+  "file": "JsonSerialization.js",
+  "sourceRoot": "../../src/serialization/",
+  "sources": [
+    "JsonSerialization.coffee"
+  ],
+  "names": [],
+  "mappings": "AAAA;AAAA,MAAA,iBAAA;;AAAA,EAAA,MAAM,CAAC,OAAP,GAAuB;mCACrB;;AAAA,gCAAA,SAAA,GAAW,SAAC,OAAD,GAAA;aACT,IAAI,CAAC,SAAL,CAAe,OAAf,EADS;IAAA,CAAX,CAAA;;6BAAA;;MADF,CAAA;AAAA"
+}
