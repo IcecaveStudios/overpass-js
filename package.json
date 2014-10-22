@@ -31,9 +31,10 @@
     "grunt-cli": "^0.1",
     "grunt-contrib-coffee": "^0.12",
     "grunt-coveralls": "^1.0",
-    "grunt-env": "^0.4.2",
+    "grunt-env": "^0.4",
     "grunt-istanbul": "^0.3",
-    "grunt-jasmine-node": "^0.2"
+    "grunt-jasmine-node": "^0.2",
+    "grunt-open": "^0.2"
   },
   "licenses": [
     {
