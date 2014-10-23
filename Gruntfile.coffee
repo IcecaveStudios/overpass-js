@@ -37,9 +37,10 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-env'
   grunt.loadNpmTasks 'grunt-istanbul'
   grunt.loadNpmTasks 'grunt-jasmine-node'
+  grunt.loadNpmTasks 'grunt-newer'
   grunt.loadNpmTasks 'grunt-open'
 
-  grunt.registerTask 'build', 'coffee:compile'
+  grunt.registerTask 'build', 'newer:coffee:compile'
   grunt.registerTask 'test', ['build', 'jasmine_node']
   grunt.registerTask 'pre-coverage', ['env:coverage', 'build', 'instrument']
   grunt.registerTask 'post-coverage', ['storeCoverage', 'makeReport']
