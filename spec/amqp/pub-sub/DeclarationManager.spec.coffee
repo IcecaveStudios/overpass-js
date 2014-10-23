@@ -5,11 +5,11 @@ DeclarationManager = requireHelper 'amqp/pub-sub/DeclarationManager'
 describe 'amqp.pub-sub.DeclarationManager', ->
   beforeEach ->
     @channel = jasmine.createSpyObj 'channel', ['assertExchange', 'assertQueue']
-    @subject = new DeclarationManager(@channel)
+    @subject = new DeclarationManager @channel
 
     @error = new Error 'Error message.'
 
-  it 'accepts a channel as a dependency', ->
+  it 'stores the supplied dependencies', ->
     expect(@subject.channel).toBe @channel
 
   describe 'exchange', ->
@@ -70,8 +70,7 @@ describe 'amqp.pub-sub.DeclarationManager', ->
 
   describe 'queue', ->
     beforeEach ->
-      @channel.assertQueue.andCallFake () ->
-        Promise.resolve queue: 'queue-name'
+      @channel.assertQueue.andCallFake () -> Promise.resolve queue: 'queue-name'
 
     it 'delares the queue correctly', ->
       actual = null

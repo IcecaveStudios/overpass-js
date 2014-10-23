@@ -1,8 +1,7 @@
 {Promise} = require 'bluebird'
 
 module.exports = class DeclarationManager
-  constructor: (channel) ->
-    @channel = channel
+  constructor: (@channel) ->
     @_exchange = undefined
     @_queue = undefined
 
