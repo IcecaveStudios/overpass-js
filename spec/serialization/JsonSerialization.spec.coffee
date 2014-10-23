@@ -1,8 +1,5 @@
-require '../custom-matchers'
 requireHelper = require '../require-helper'
 JsonSerialization = requireHelper 'serialization/JsonSerialization'
-SerializeError = requireHelper 'serialization/error/SerializeError'
-UnserializeError = requireHelper 'serialization/error/UnserializeError'
 
 describe 'serialization.JsonSerialization', ->
   beforeEach ->
@@ -17,11 +14,13 @@ describe 'serialization.JsonSerialization', ->
       expect(@subject.serialize([1, '2'])).toBe '[1,"2"]'
 
     it 'throws an error when supplied with invalid input', ->
-      expect(=> @subject.serialize(->)).toThrow new SerializeError()
-      expect(=> @subject.serialize(true)).toThrow new SerializeError()
-      expect(=> @subject.serialize(null)).toThrow new SerializeError()
-      expect(=> @subject.serialize(undefined)).toThrow new SerializeError()
-      expect(=> @subject.serialize('foo')).toThrow new SerializeError()
+      expected = new Error 'Payload must be an object or an array.'
+
+      expect(=> @subject.serialize(->)).toThrow expected
+      expect(=> @subject.serialize(true)).toThrow expected
+      expect(=> @subject.serialize(null)).toThrow expected
+      expect(=> @subject.serialize(undefined)).toThrow expected
+      expect(=> @subject.serialize('foo')).toThrow expected
 
   describe 'unserialize', ->
     it 'unserializes JSON into payloads', ->
@@ -32,19 +31,22 @@ describe 'serialization.JsonSerialization', ->
       expect(@subject.unserialize('[1,"2"]')).toEqual [1, '2']
 
     it 'throws an error when supplied with invalid syntax', ->
-      expected = new UnserializeError(new SyntaxError('Unexpected end of input'))
-      expect(=> @subject.unserialize('{')).toThrowWithCause expected
+      expect(=> @subject.unserialize('{')).toThrow new SyntaxError 'Unexpected end of input'
 
     it 'throws an error when supplied with an invalid payload', ->
-      expect(=> @subject.unserialize('true')).toThrow new UnserializeError()
-      expect(=> @subject.unserialize('null')).toThrow new UnserializeError()
-      expect(=> @subject.unserialize('"foo"')).toThrow new UnserializeError()
+      expected = new Error 'Payload must be an object or an array.'
+
+      expect(=> @subject.unserialize('true')).toThrow expected
+      expect(=> @subject.unserialize('null')).toThrow expected
+      expect(=> @subject.unserialize('"foo"')).toThrow expected
 
     it 'throws an error when supplied with invalid input', ->
-      expect(=> @subject.unserialize(null)).toThrow new UnserializeError()
-      expect(=> @subject.unserialize(undefined)).toThrow new UnserializeError()
-      expect(=> @subject.unserialize(true)).toThrow new UnserializeError()
-      expect(=> @subject.unserialize(1)).toThrow new UnserializeError()
-      expect(=> @subject.unserialize([])).toThrow new UnserializeError()
-      expect(=> @subject.unserialize({})).toThrow new UnserializeError()
-      expect(=> @subject.unserialize(->)).toThrow new UnserializeError()
+      expected = new Error 'Could not unserialize payload.'
+
+      expect(=> @subject.unserialize(null)).toThrow expected
+      expect(=> @subject.unserialize(undefined)).toThrow expected
+      expect(=> @subject.unserialize(true)).toThrow expected
+      expect(=> @subject.unserialize(1)).toThrow expected
+      expect(=> @subject.unserialize([])).toThrow expected
+      expect(=> @subject.unserialize({})).toThrow expected
+      expect(=> @subject.unserialize(->)).toThrow expected

@@ -39,7 +39,7 @@
             },
             "inherits": {
               "version": "2.0.1",
-              "from": "inherits@>=2.0.0 <3.0.0",
+              "from": "inherits@>=2.0.1 <2.1.0",
               "resolved": "https://registry.npmjs.org/inherits/-/inherits-2.0.1.tgz"
             }
           }
@@ -53,7 +53,7 @@
     },
     "bluebird": {
       "version": "2.3.6",
-      "from": "bluebird@*",
+      "from": "bluebird@>=2.3.0 <3.0.0",
       "resolved": "https://registry.npmjs.org/bluebird/-/bluebird-2.3.6.tgz"
     }
   }

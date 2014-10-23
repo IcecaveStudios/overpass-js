@@ -1,22 +1,16 @@
-SerializeError = require './error/SerializeError'
-UnserializeError = require './error/UnserializeError'
-
 module.exports = class JsonSerialization
   serialize: (payload) ->
-    throw new SerializeError() if typeof payload not in ['object', 'array'] or
-      payload is null
+    if typeof payload not in ['object', 'array'] or payload is null
+      throw new Error 'Payload must be an object or an array.'
 
     JSON.stringify payload
 
   unserialize: (buffer) ->
-    throw new UnserializeError() if typeof buffer isnt 'string'
+    throw new Error('Could not unserialize payload.') if typeof buffer isnt 'string'
 
-    try
-      payload = JSON.parse buffer
-    catch e
-      throw new UnserializeError(e)
+    payload = JSON.parse buffer
 
-    throw new UnserializeError() if typeof payload not in ['object', 'array'] or
-      payload is null
+    if typeof payload not in ['object', 'array'] or payload is null
+      throw new Error('Payload must be an object or an array.')
 
     payload

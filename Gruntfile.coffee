@@ -1,5 +1,7 @@
 module.exports = (grunt) ->
   grunt.initConfig
+    clean: ['build', 'lib']
+
     coffee:
       compile:
         cwd: 'src'
@@ -32,6 +34,7 @@ module.exports = (grunt) ->
       coverage:
         path: 'build/reports/lcov-report/index.html'
 
+  grunt.loadNpmTasks 'grunt-contrib-clean'
   grunt.loadNpmTasks 'grunt-contrib-coffee'
   grunt.loadNpmTasks 'grunt-coveralls'
   grunt.loadNpmTasks 'grunt-env'
@@ -40,7 +43,7 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-newer'
   grunt.loadNpmTasks 'grunt-open'
 
-  grunt.registerTask 'build', 'newer:coffee:compile'
+  grunt.registerTask 'build', ['newer:coffee:compile']
   grunt.registerTask 'test', ['build', 'jasmine_node']
 
   grunt.registerTask 'pre-coverage', ['env:coverage', 'build', 'instrument']
