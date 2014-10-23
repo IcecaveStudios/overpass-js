@@ -4,9 +4,7 @@ DeclarationManager = requireHelper 'amqp/pub-sub/DeclarationManager'
 
 describe 'amqp.pub-sub.DeclarationManager', ->
   beforeEach ->
-    @channel = jasmine.createSpyObj 'channel', ['assertExchange']
-    @channel.assertExchange.andCallFake (exchange) ->
-      Promise.resolve exchange: exchange
+    @channel = jasmine.createSpyObj 'channel', ['assertExchange', 'assertQueue']
     @subject = new DeclarationManager(@channel)
 
     @error = new Error 'Error message.'
@@ -15,6 +13,10 @@ describe 'amqp.pub-sub.DeclarationManager', ->
     expect(@subject.channel).toBe @channel
 
   describe 'exchange', ->
+    beforeEach ->
+      @channel.assertExchange.andCallFake (exchange) ->
+        Promise.resolve exchange: exchange
+
     it 'delares the exchange correctly', ->
       actual = null
       runs -> @subject.exchange().then (exchange) -> actual = exchange
@@ -65,3 +67,59 @@ describe 'amqp.pub-sub.DeclarationManager', ->
       runs ->
         expect(actualA).toBe @error
         expect(actualB).toBe 'overpass.pubsub'
+
+  describe 'queue', ->
+    beforeEach ->
+      @channel.assertQueue.andCallFake () ->
+        Promise.resolve queue: 'queue-name'
+
+    it 'delares the queue correctly', ->
+      actual = null
+      runs -> @subject.queue().then (queue) -> actual = queue
+
+      waitsFor -> actual isnt null
+      runs ->
+        expect(actual).toBe 'queue-name'
+        expect(@channel.assertQueue)
+          .toHaveBeenCalledWith null,
+            durable: false
+            exclusive: true
+
+    it 'only declares the queue once', ->
+      actualA = null
+      actualB = null
+      runs -> Promise.join [
+        @subject.queue().then (queue) -> actualA = queue
+        @subject.queue().then (queue) -> actualB = queue
+      ]
+
+      waitsFor -> actualA isnt null and actualB isnt null
+      runs ->
+        expect(actualA).toBe 'queue-name'
+        expect(actualB).toBe actualA
+        expect(@channel.assertQueue.calls.length).toBe 1
+
+    it 'propagates errors', ->
+      actual = null
+      @channel.assertQueue.andCallFake () => Promise.reject @error
+      runs -> @subject.queue().catch (error) -> actual = error
+
+      waitsFor -> actual isnt null
+      runs -> expect(actual).toBe @error
+
+    it 'can declare the queue after an initial error', ->
+      actualA = null
+      actualB = null
+      runs ->
+        @channel.assertQueue.andCallFake () => Promise.reject @error
+        @subject.queue().catch (error) -> actualA = error
+      waitsFor -> actualA isnt null
+      runs ->
+        @channel.assertQueue.andCallFake () ->
+          Promise.resolve queue: 'queue-name'
+        @subject.queue().then (queue) -> actualB = queue
+
+      waitsFor -> actualB isnt null
+      runs ->
+        expect(actualA).toBe @error
+        expect(actualB).toBe 'queue-name'
