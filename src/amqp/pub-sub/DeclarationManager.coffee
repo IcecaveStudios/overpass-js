@@ -1,12 +1,14 @@
+{Promise} = require 'bluebird'
+
 module.exports = class DeclarationManager
   constructor: (channel) ->
     @channel = channel
+    @_exchange = undefined
 
   exchange: ->
-    p = @channel.assertExchange 'overpass.pubsub', 'topic',
-      durable: false
-      autoDelete: false
+    return @_exchange if @_exchange? and not @_exchange.isRejected()
 
-    p.then (response) ->
-      return response.exchange
-
+    @_exchange = @channel.assertExchange 'overpass.pubsub', 'topic',
+        durable: false
+        autoDelete: false
+      .then (response) -> response.exchange
