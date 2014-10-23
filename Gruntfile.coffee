@@ -42,10 +42,13 @@ module.exports = (grunt) ->
 
   grunt.registerTask 'build', 'newer:coffee:compile'
   grunt.registerTask 'test', ['build', 'jasmine_node']
+
   grunt.registerTask 'pre-coverage', ['env:coverage', 'build', 'instrument']
   grunt.registerTask 'post-coverage', ['storeCoverage', 'makeReport']
   grunt.registerTask 'coverage', ['pre-coverage', 'test', 'post-coverage']
   grunt.registerTask 'open-coverage', ['coverage', 'open:coverage']
+  grunt.registerTask 'c', 'coverage'
+
   grunt.registerTask 'travis', ['coverage', 'coveralls']
 
   grunt.registerTask 'default', 'test'
