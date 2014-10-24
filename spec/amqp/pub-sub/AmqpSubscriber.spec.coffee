@@ -35,51 +35,89 @@ describe 'amqp.pub-sub.AmqpSubscriber', ->
         =>
           expect(@channel.bindQueue).toHaveBeenCalledWith 'queue-name', 'exchange-name', 'topic.#.a'
           expect(@channel.bindQueue).toHaveBeenCalledWith 'queue-name', 'exchange-name', 'topic.*.b'
+          expect(@subject._state 'topic.#.a').toBe 'subscribed'
+          expect(@subject._state 'topic.*.b').toBe 'subscribed'
           done()
 
-    it 'only binds if not already bound', (done) ->
+    it 'only binds once for concurrent subscriptions', (done) ->
       bluebird.join \
-        @subject.subscribe('topic.*.a'),
-        @subject.subscribe('topic.*.a'),
+        @subject.subscribe('topic-name'),
+        @subject.subscribe('topic-name'),
         =>
-          expect(@channel.bindQueue).toHaveBeenCalledWith 'queue-name', 'exchange-name', 'topic.#.a'
+          expect(@channel.bindQueue).toHaveBeenCalledWith 'queue-name', 'exchange-name', 'topic-name'
           expect(@channel.bindQueue.calls.length).toBe 1
+          expect(@subject._state 'topic-name').toBe 'subscribed'
           done()
+
+    it 'only binds once for sequential subscriptions', (done) ->
+      @subject.subscribe('topic-name')
+      .then => @subject.subscribe('topic-name')
+      .then =>
+        expect(@channel.bindQueue).toHaveBeenCalledWith 'queue-name', 'exchange-name', 'topic-name'
+        expect(@channel.bindQueue.calls.length).toBe 1
+        expect(@subject._state 'topic-name').toBe 'subscribed'
+        done()
 
     it 'propagates queue creation errors', (done) ->
       @declarationManager.queue.andCallFake => bluebird.reject @error
 
-      @subject.subscribe('topic.*.a').catch (actual) =>
+      @subject.subscribe('topic-name').catch (actual) =>
         expect(actual).toBe @error
         expect(@channel.bindQueue.calls.length).toBe 0
+        expect(@subject._state 'topic-name').toBe 'unsubscribed'
         done()
 
     it 'propagates exchange creation errors', (done) ->
       @declarationManager.exchange.andCallFake => bluebird.reject @error
 
-      @subject.subscribe('topic.*.a').catch (actual) =>
+      @subject.subscribe('topic-name').catch (actual) =>
         expect(actual).toBe @error
         expect(@channel.bindQueue.calls.length).toBe 0
+        expect(@subject._state 'topic-name').toBe 'unsubscribed'
         done()
 
     it 'propagates binding errors', (done) ->
       @channel.bindQueue.andCallFake => bluebird.reject @error
 
-      @subject.subscribe('topic.*.a').catch (actual) =>
+      @subject.subscribe('topic-name').catch (actual) =>
         expect(actual).toBe @error
+        expect(@subject._state 'topic-name').toBe 'unsubscribed'
         done()
 
     it 'can subscribe after an initial error', (done) ->
       @channel.bindQueue.andCallFake => bluebird.reject @error
 
-      @subject.subscribe('topic.*.a').catch (actual) =>
+      @subject.subscribe('topic-name').catch (actual) =>
         expect(actual).toBe @error
       .then =>
         @channel.bindQueue.andReturn()
-        @subject.subscribe('topic.*.a')
+        @subject.subscribe('topic-name')
       .then =>
-        expect(@channel.bindQueue).toHaveBeenCalledWith 'queue-name', 'exchange-name', 'topic.#.a'
+        expect(@channel.bindQueue).toHaveBeenCalledWith 'queue-name', 'exchange-name', 'topic-name'
         expect(@channel.bindQueue.calls.length).toBe 2
+        expect(@subject._state 'topic-name').toBe 'subscribed'
+        done()
+
+    it 'can re-subscribe after unsubscribing', (done) ->
+      @subject.subscribe('topic-name')
+      .then => @subject.unsubscribe('topic-name')
+      .then => @subject.subscribe('topic-name')
+      .then =>
+        expect(@channel.bindQueue).toHaveBeenCalledWith 'queue-name', 'exchange-name', 'topic-name'
+        expect(@channel.unbindQueue).toHaveBeenCalledWith 'queue-name', 'exchange-name', 'topic-name'
+        expect(@channel.bindQueue.calls.length).toBe 2
+        expect(@subject._state 'topic-name').toBe 'subscribed'
+        done()
+
+    it 're-subscribes after any pending unsubscriptions', (done) ->
+      @subject.subscribe 'topic-name'
+      @subject.unsubscribe 'topic-name'
+
+      @subject.subscribe('topic-name').then =>
+        expect(@channel.bindQueue).toHaveBeenCalledWith 'queue-name', 'exchange-name', 'topic-name'
+        expect(@channel.unbindQueue).toHaveBeenCalledWith 'queue-name', 'exchange-name', 'topic-name'
+        expect(@channel.bindQueue.calls.length).toBe 2
+        expect(@subject._state 'topic-name').toBe 'subscribed'
         done()
 
   describe 'unsubscribe', ->
@@ -92,45 +130,83 @@ describe 'amqp.pub-sub.AmqpSubscriber', ->
         =>
           expect(@channel.unbindQueue).toHaveBeenCalledWith 'queue-name', 'exchange-name', 'topic.#.a'
           expect(@channel.unbindQueue).toHaveBeenCalledWith 'queue-name', 'exchange-name', 'topic.*.b'
+          expect(@subject._state 'topic.#.a').toBe 'unsubscribed'
+          expect(@subject._state 'topic.*.b').toBe 'unsubscribed'
           done()
 
-    it 'only unbinds if already bound', (done) ->
+    it 'only unbinds once for concurrent unsubscriptions', (done) ->
       bluebird.join \
-        @subject.unsubscribe('topic.*.a'),
-        @subject.subscribe('topic.*.a'),
-        @subject.unsubscribe('topic.*.a'),
-        @subject.unsubscribe('topic.*.a'),
+        @subject.unsubscribe('topic-name'),
+        @subject.subscribe('topic-name'),
+        @subject.unsubscribe('topic-name'),
+        @subject.unsubscribe('topic-name'),
         =>
-          expect(@channel.unbindQueue).toHaveBeenCalledWith 'queue-name', 'exchange-name', 'topic.#.a'
+          expect(@channel.unbindQueue).toHaveBeenCalledWith 'queue-name', 'exchange-name', 'topic-name'
           expect(@channel.unbindQueue.calls.length).toBe 1
+          expect(@subject._state 'topic-name').toBe 'unsubscribed'
           done()
+
+    it 'only unbinds once for sequential unsubscriptions', (done) ->
+      @subject.unsubscribe('topic-name')
+      .then => @subject.subscribe('topic-name')
+      .then => @subject.unsubscribe('topic-name')
+      .then => @subject.unsubscribe('topic-name')
+      .then =>
+        expect(@channel.unbindQueue).toHaveBeenCalledWith 'queue-name', 'exchange-name', 'topic-name'
+        expect(@channel.unbindQueue.calls.length).toBe 1
+        expect(@subject._state 'topic-name').toBe 'unsubscribed'
+        done()
 
     it 'never unbinds if never bound', (done) ->
-      @subject.unsubscribe('topic.*.a').then =>
-          expect(@channel.unbindQueue.calls.length).toBe 0
-          done()
+      @subject.unsubscribe('topic-name').then =>
+        expect(@channel.unbindQueue.calls.length).toBe 0
+        expect(@subject._state 'topic-name').toBe 'unsubscribed'
+        done()
 
     it 'propagates unbinding errors', (done) ->
       @channel.unbindQueue.andCallFake => bluebird.reject @error
 
-      @subject.subscribe('topic.*.a')
-        .then => @subject.unsubscribe('topic.*.a')
-        .catch (actual) =>
-          expect(actual).toBe @error
-          expect(@channel.unbindQueue.calls.length).toBe 1
-          done()
+      @subject.subscribe('topic-name')
+      .then => @subject.unsubscribe('topic-name')
+      .catch (actual) =>
+        expect(actual).toBe @error
+        expect(@channel.unbindQueue.calls.length).toBe 1
+        expect(@subject._state 'topic-name').toBe 'subscribed'
+        done()
 
     it 'can unsubscribe after an initial error', (done) ->
       @channel.unbindQueue.andCallFake => bluebird.reject @error
 
-      @subject.subscribe('topic.*.a')
-      .then => @subject.unsubscribe('topic.*.a')
+      @subject.subscribe('topic-name')
+      .then => @subject.unsubscribe('topic-name')
       .catch (actual) =>
         expect(actual).toBe @error
       .then =>
         @channel.unbindQueue.andReturn()
-        @subject.unsubscribe('topic.*.a')
+        @subject.unsubscribe('topic-name')
       .then =>
-        expect(@channel.unbindQueue).toHaveBeenCalledWith 'queue-name', 'exchange-name', 'topic.#.a'
+        expect(@channel.unbindQueue).toHaveBeenCalledWith 'queue-name', 'exchange-name', 'topic-name'
         expect(@channel.unbindQueue.calls.length).toBe 2
+        expect(@subject._state 'topic-name').toBe 'unsubscribed'
+        done()
+
+    it 'can unsubscribe after re-subscribing', (done) ->
+      @subject.subscribe('topic-name')
+      .then => @subject.unsubscribe('topic-name')
+      .then => @subject.subscribe('topic-name')
+      .then => @subject.unsubscribe('topic-name')
+      .then =>
+        expect(@channel.bindQueue).toHaveBeenCalledWith 'queue-name', 'exchange-name', 'topic-name'
+        expect(@channel.unbindQueue).toHaveBeenCalledWith 'queue-name', 'exchange-name', 'topic-name'
+        expect(@channel.unbindQueue.calls.length).toBe 2
+        expect(@subject._state 'topic-name').toBe 'unsubscribed'
+        done()
+
+    it 'unsubscribes after any pending subscriptions', (done) ->
+      @subject.subscribe 'topic-name'
+
+      @subject.unsubscribe('topic-name').then =>
+        expect(@channel.bindQueue).toHaveBeenCalledWith 'queue-name', 'exchange-name', 'topic-name'
+        expect(@channel.unbindQueue).toHaveBeenCalledWith 'queue-name', 'exchange-name', 'topic-name'
+        expect(@subject._state 'topic-name').toBe 'unsubscribed'
         done()
