@@ -22,9 +22,9 @@ describe 'amqp.pub-sub.DeclarationManager', ->
 
       waitsFor -> actual isnt null
       runs ->
-        expect(actual).toBe 'overpass.pubsub'
+        expect(actual).toBe 'overpass/pubsub'
         expect(@channel.assertExchange)
-          .toHaveBeenCalledWith 'overpass.pubsub', 'topic',
+          .toHaveBeenCalledWith 'overpass/pubsub', 'topic',
             durable: false
             autoDelete: false
 
@@ -38,13 +38,13 @@ describe 'amqp.pub-sub.DeclarationManager', ->
 
       waitsFor -> actualA isnt null and actualB isnt null
       runs ->
-        expect(actualA).toBe 'overpass.pubsub'
+        expect(actualA).toBe 'overpass/pubsub'
         expect(actualB).toBe actualA
         expect(@channel.assertExchange.calls.length).toBe 1
 
     it 'propagates errors', ->
       actual = null
-      @channel.assertExchange.andCallFake () => Promise.reject @error
+      @channel.assertExchange.andCallFake => Promise.reject @error
       runs -> @subject.exchange().catch (error) -> actual = error
 
       waitsFor -> actual isnt null
@@ -54,7 +54,7 @@ describe 'amqp.pub-sub.DeclarationManager', ->
       actualA = null
       actualB = null
       runs ->
-        @channel.assertExchange.andCallFake () => Promise.reject @error
+        @channel.assertExchange.andCallFake => Promise.reject @error
         @subject.exchange().catch (error) -> actualA = error
       waitsFor -> actualA isnt null
       runs ->
@@ -64,11 +64,11 @@ describe 'amqp.pub-sub.DeclarationManager', ->
       waitsFor -> actualB isnt null
       runs ->
         expect(actualA).toBe @error
-        expect(actualB).toBe 'overpass.pubsub'
+        expect(actualB).toBe 'overpass/pubsub'
 
   describe 'queue', ->
     beforeEach ->
-      @channel.assertQueue.andCallFake () -> Promise.resolve queue: 'queue-name'
+      @channel.assertQueue.andCallFake -> Promise.resolve queue: 'queue-name'
 
     it 'delares the queue correctly', ->
       actual = null
@@ -98,7 +98,7 @@ describe 'amqp.pub-sub.DeclarationManager', ->
 
     it 'propagates errors', ->
       actual = null
-      @channel.assertQueue.andCallFake () => Promise.reject @error
+      @channel.assertQueue.andCallFake => Promise.reject @error
       runs -> @subject.queue().catch (error) -> actual = error
 
       waitsFor -> actual isnt null
@@ -108,11 +108,11 @@ describe 'amqp.pub-sub.DeclarationManager', ->
       actualA = null
       actualB = null
       runs ->
-        @channel.assertQueue.andCallFake () => Promise.reject @error
+        @channel.assertQueue.andCallFake => Promise.reject @error
         @subject.queue().catch (error) -> actualA = error
       waitsFor -> actualA isnt null
       runs ->
-        @channel.assertQueue.andCallFake () -> Promise.resolve queue: 'queue-name'
+        @channel.assertQueue.andCallFake -> Promise.resolve queue: 'queue-name'
         @subject.queue().then (queue) -> actualB = queue
 
       waitsFor -> actualB isnt null

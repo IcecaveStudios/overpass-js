@@ -9,7 +9,7 @@ module.exports = class DeclarationManager
     return @_exchange if @_exchange? and not @_exchange.isRejected()
 
     @_exchange = Promise.resolve \
-      @channel.assertExchange 'overpass.pubsub', 'topic',
+      @channel.assertExchange 'overpass/pubsub', 'topic',
         durable: false
         autoDelete: false
       .then (response) -> response.exchange
