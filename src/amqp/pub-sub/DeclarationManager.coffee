@@ -2,8 +2,8 @@ bluebird = require 'bluebird'
 
 module.exports = class DeclarationManager
   constructor: (@channel) ->
-    @_exchange = undefined
-    @_queue = undefined
+    @_exchange = null
+    @_queue = null
 
   exchange: ->
     return @_exchange if @_exchange? and not @_exchange.isRejected()

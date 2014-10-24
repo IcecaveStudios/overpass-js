@@ -1,8 +1,9 @@
 bluebird = require 'bluebird'
+{EventEmitter} = require 'events'
 DeclarationManager = require './DeclarationManager'
 JsonSerialization = require '../../serialization/JsonSerialization'
 
-module.exports = class AmqpSubscriber
+module.exports = class AmqpSubscriber extends EventEmitter
   constructor: (
     @channel,
     @declarationManager = new DeclarationManager(@channel),
@@ -10,6 +11,14 @@ module.exports = class AmqpSubscriber
   ) ->
     @_promises = {}
     @_topicStates = {}
+    @_consumer = null
+    @_consumerState = 'detached'
+    @_consumerTag = null
+
+    @on 'newListener', (event) =>
+      @_onMessageListenerAdded() if event is 'message'
+    @on 'removeListener', (event) =>
+      @_onMessageListenerRemoved() if event is 'message'
 
   subscribe: (topic) ->
     topic = @_normalizeTopic topic
@@ -76,3 +85,57 @@ module.exports = class AmqpSubscriber
       delete @_topicStates[topic]
     else
       @_topicStates[topic] = state
+
+  _onMessageListenerAdded: -> @_consume()
+
+  _onMessageListenerRemoved: ->
+    @_cancelConsume() if EventEmitter.listenerCount(@, 'message') < 1
+
+  _consume: ->
+    switch @_consumerState
+      when 'consuming'
+        bluebird.resolve()
+      when 'attaching'
+        @_consumer
+      when 'detached'
+        @_consumerState = 'attaching'
+        @_consumer = @_doConsume()
+      when 'cancelling'
+        @_consumerState = 'attaching'
+        @_consumer = @_consumer.then => @_doConsume()
+
+  _cancelConsume: ->
+    switch @_consumerState
+      when 'consuming'
+        @_consumerState = 'cancelling'
+        @_consumer = @_doCancel()
+      when 'attaching'
+        @_consumerState = 'cancelling'
+        @_consumer = @_consumer.then => @_doCancel()
+      when 'detached'
+        bluebird.resolve()
+      when 'cancelling'
+        @_consumer
+
+  _doConsume: ->
+    consumer = @declarationManager.queue().then (queue) =>
+      @channel.consume queue, (message) =>
+        @emit 'message', @serialization.unserialize message.content
+
+    consumer
+      .then (response) =>
+        @_consumerState = 'consuming'
+        @_consumerTag = response.consumerTag
+      .catch (error) =>
+        @_consumerState = 'detached'
+        throw error
+
+  _doCancel: ->
+    cancel = @channel.cancel @_consumerTag
+    cancel
+      .then =>
+        console.log 'finished detaching'
+        @_consumerState = 'detached'
+        @_consumerTag = null
+      .catch (error) =>
+        @_consumerState = 'consuming'
