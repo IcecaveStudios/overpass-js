@@ -1,5 +1,7 @@
 .gitattributes export-ignore
 .gitignore export-ignore
 .travis.* export-ignore
-spec export-ignore
-src export-ignore
+/examples/ export-ignore
+/Gruntfile.* export-ignore
+/spec/ export-ignore
+/src/ export-ignore
