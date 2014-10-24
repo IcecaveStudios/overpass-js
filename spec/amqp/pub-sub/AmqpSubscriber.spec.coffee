@@ -6,11 +6,13 @@ JsonSerialization = requireHelper 'serialization/JsonSerialization'
 
 describe 'amqp.pub-sub.AmqpSubscriber', ->
   beforeEach ->
-    @channel = jasmine.createSpyObj 'channel', ['bindQueue']
+    @channel = jasmine.createSpyObj 'channel', ['bindQueue', 'unbindQueue']
     @declarationManager = jasmine.createSpyObj 'declarationManager', ['queue', 'exchange']
     @serialization = new JsonSerialization()
     @subject = new AmqpSubscriber @channel, @declarationManager, @serialization
 
+    @declarationManager.queue.andCallFake -> bluebird.resolve 'queue-name'
+    @declarationManager.exchange.andCallFake -> bluebird.resolve 'exchange-name'
     @error = new Error 'Error message.'
 
   it 'stores the supplied dependencies', ->
@@ -26,11 +28,7 @@ describe 'amqp.pub-sub.AmqpSubscriber', ->
     expect(@subject.serialization).toEqual new JsonSerialization
 
   describe 'subscribe', ->
-    beforeEach ->
-      @declarationManager.queue.andCallFake -> bluebird.resolve 'queue-name'
-      @declarationManager.exchange.andCallFake -> bluebird.resolve 'exchange-name'
-
-    it 'binds to topic queues', (done) ->
+    it 'binds correctly', (done) ->
       bluebird.join \
         @subject.subscribe('topic.*.a'),
         @subject.subscribe('topic.?.b'),
@@ -39,7 +37,7 @@ describe 'amqp.pub-sub.AmqpSubscriber', ->
           expect(@channel.bindQueue).toHaveBeenCalledWith 'queue-name', 'exchange-name', 'topic.*.b'
           done()
 
-    it 'only binds once for each topic', (done) ->
+    it 'only binds if not already bound', (done) ->
       bluebird.join \
         @subject.subscribe('topic.*.a'),
         @subject.subscribe('topic.*.a'),
@@ -82,4 +80,57 @@ describe 'amqp.pub-sub.AmqpSubscriber', ->
       .then =>
         expect(@channel.bindQueue).toHaveBeenCalledWith 'queue-name', 'exchange-name', 'topic.#.a'
         expect(@channel.bindQueue.calls.length).toBe 2
+        done()
+
+  describe 'unsubscribe', ->
+    it 'unbinds correctly', (done) ->
+      bluebird.join \
+        @subject.subscribe('topic.*.a'),
+        @subject.unsubscribe('topic.*.a'),
+        @subject.subscribe('topic.?.b'),
+        @subject.unsubscribe('topic.?.b'),
+        =>
+          expect(@channel.unbindQueue).toHaveBeenCalledWith 'queue-name', 'exchange-name', 'topic.#.a'
+          expect(@channel.unbindQueue).toHaveBeenCalledWith 'queue-name', 'exchange-name', 'topic.*.b'
+          done()
+
+    it 'only unbinds if already bound', (done) ->
+      bluebird.join \
+        @subject.unsubscribe('topic.*.a'),
+        @subject.subscribe('topic.*.a'),
+        @subject.unsubscribe('topic.*.a'),
+        @subject.unsubscribe('topic.*.a'),
+        =>
+          expect(@channel.unbindQueue).toHaveBeenCalledWith 'queue-name', 'exchange-name', 'topic.#.a'
+          expect(@channel.unbindQueue.calls.length).toBe 1
+          done()
+
+    it 'never unbinds if never bound', (done) ->
+      @subject.unsubscribe('topic.*.a').then =>
+          expect(@channel.unbindQueue.calls.length).toBe 0
+          done()
+
+    it 'propagates unbinding errors', (done) ->
+      @channel.unbindQueue.andCallFake => bluebird.reject @error
+
+      @subject.subscribe('topic.*.a')
+        .then => @subject.unsubscribe('topic.*.a')
+        .catch (actual) =>
+          expect(actual).toBe @error
+          expect(@channel.unbindQueue.calls.length).toBe 1
+          done()
+
+    it 'can unsubscribe after an initial error', (done) ->
+      @channel.unbindQueue.andCallFake => bluebird.reject @error
+
+      @subject.subscribe('topic.*.a')
+      .then => @subject.unsubscribe('topic.*.a')
+      .catch (actual) =>
+        expect(actual).toBe @error
+      .then =>
+        @channel.unbindQueue.andReturn()
+        @subject.unsubscribe('topic.*.a')
+      .then =>
+        expect(@channel.unbindQueue).toHaveBeenCalledWith 'queue-name', 'exchange-name', 'topic.#.a'
+        expect(@channel.unbindQueue.calls.length).toBe 2
         done()
