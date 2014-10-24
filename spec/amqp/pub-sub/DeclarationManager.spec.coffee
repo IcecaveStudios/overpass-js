@@ -1,4 +1,4 @@
-{Promise} = require 'bluebird'
+bluebird = require 'bluebird'
 requireHelper = require '../../require-helper'
 DeclarationManager = requireHelper 'amqp/pub-sub/DeclarationManager'
 
@@ -14,108 +14,79 @@ describe 'amqp.pub-sub.DeclarationManager', ->
 
   describe 'exchange', ->
     beforeEach ->
-      @channel.assertExchange.andCallFake (exchange) -> Promise.resolve exchange: exchange
+      @channel.assertExchange.andCallFake (exchange) -> bluebird.resolve exchange: exchange
 
-    it 'delares the exchange correctly', ->
-      actual = null
-      runs -> @subject.exchange().then (exchange) -> actual = exchange
-
-      waitsFor -> actual isnt null
-      runs ->
+    it 'delares the exchange correctly', (done) ->
+      @subject.exchange().then (actual) =>
         expect(actual).toBe 'overpass/pubsub'
         expect(@channel.assertExchange)
-          .toHaveBeenCalledWith 'overpass/pubsub', 'topic',
-            durable: false
-            autoDelete: false
+          .toHaveBeenCalledWith 'overpass/pubsub', 'topic', durable: false, autoDelete: false
+        done()
 
-    it 'only declares the exchange once', ->
-      actualA = null
-      actualB = null
-      runs -> Promise.join [
-        @subject.exchange().then (exchange) -> actualA = exchange
-        @subject.exchange().then (exchange) -> actualB = exchange
-      ]
+    it 'only declares the exchange once', (done) ->
+      bluebird.join \
+        @subject.exchange(),
+        @subject.exchange(),
+        (actualA, actualB) =>
+          expect(actualA).toBe 'overpass/pubsub'
+          expect(actualB).toBe actualA
+          expect(@channel.assertExchange.calls.length).toBe 1
+          done()
 
-      waitsFor -> actualA isnt null and actualB isnt null
-      runs ->
-        expect(actualA).toBe 'overpass/pubsub'
-        expect(actualB).toBe actualA
-        expect(@channel.assertExchange.calls.length).toBe 1
+    it 'propagates errors', (done) ->
+      @channel.assertExchange.andCallFake => bluebird.reject @error
 
-    it 'propagates errors', ->
-      actual = null
-      @channel.assertExchange.andCallFake => Promise.reject @error
-      runs -> @subject.exchange().catch (error) -> actual = error
+      @subject.exchange().catch (actual) =>
+        expect(actual).toBe @error
+        done()
 
-      waitsFor -> actual isnt null
-      runs -> expect(actual).toBe @error
+    it 'can declare the exchange after an initial error', (done) ->
+      @channel.assertExchange.andCallFake => bluebird.reject @error
 
-    it 'can declare the exchange after an initial error', ->
-      actualA = null
-      actualB = null
-      runs ->
-        @channel.assertExchange.andCallFake => Promise.reject @error
-        @subject.exchange().catch (error) -> actualA = error
-      waitsFor -> actualA isnt null
-      runs ->
-        @channel.assertExchange.andCallFake (exchange) -> Promise.resolve exchange: exchange
-        @subject.exchange().then (exchange) -> actualB = exchange
-
-      waitsFor -> actualB isnt null
-      runs ->
-        expect(actualA).toBe @error
-        expect(actualB).toBe 'overpass/pubsub'
+      @subject.exchange().catch (actual) =>
+        expect(actual).toBe @error
+      .then =>
+        @channel.assertExchange.andCallFake (exchange) -> bluebird.resolve exchange: exchange
+        @subject.exchange()
+      .then (actual) ->
+        expect(actual).toBe 'overpass/pubsub'
+        done()
 
   describe 'queue', ->
     beforeEach ->
-      @channel.assertQueue.andCallFake -> Promise.resolve queue: 'queue-name'
+      @channel.assertQueue.andCallFake -> bluebird.resolve queue: 'queue-name'
 
-    it 'delares the queue correctly', ->
-      actual = null
-      runs -> @subject.queue().then (queue) -> actual = queue
-
-      waitsFor -> actual isnt null
-      runs ->
+    it 'delares the queue correctly', (done) ->
+      @subject.queue().then (actual) =>
         expect(actual).toBe 'queue-name'
-        expect(@channel.assertQueue)
-          .toHaveBeenCalledWith null,
-            durable: false
-            exclusive: true
+        expect(@channel.assertQueue).toHaveBeenCalledWith null, durable: false, exclusive: true
+        done()
 
-    it 'only declares the queue once', ->
-      actualA = null
-      actualB = null
-      runs -> Promise.join [
-        @subject.queue().then (queue) -> actualA = queue
-        @subject.queue().then (queue) -> actualB = queue
-      ]
+    it 'only declares the queue once', (done) ->
+      bluebird.join \
+        @subject.queue(),
+        @subject.queue(),
+        (actualA, actualB) =>
+          expect(actualA).toBe 'queue-name'
+          expect(actualB).toBe actualA
+          expect(@channel.assertQueue.calls.length).toBe 1
+          done()
 
-      waitsFor -> actualA isnt null and actualB isnt null
-      runs ->
-        expect(actualA).toBe 'queue-name'
-        expect(actualB).toBe actualA
-        expect(@channel.assertQueue.calls.length).toBe 1
+    it 'propagates errors', (done) ->
+      @channel.assertQueue.andCallFake => bluebird.reject @error
 
-    it 'propagates errors', ->
-      actual = null
-      @channel.assertQueue.andCallFake => Promise.reject @error
-      runs -> @subject.queue().catch (error) -> actual = error
+      @subject.queue().catch (actual) =>
+        expect(actual).toBe @error
+        done()
 
-      waitsFor -> actual isnt null
-      runs -> expect(actual).toBe @error
+    it 'can declare the queue after an initial error', (done) ->
+      @channel.assertQueue.andCallFake => bluebird.reject @error
 
-    it 'can declare the queue after an initial error', ->
-      actualA = null
-      actualB = null
-      runs ->
-        @channel.assertQueue.andCallFake => Promise.reject @error
-        @subject.queue().catch (error) -> actualA = error
-      waitsFor -> actualA isnt null
-      runs ->
-        @channel.assertQueue.andCallFake -> Promise.resolve queue: 'queue-name'
-        @subject.queue().then (queue) -> actualB = queue
-
-      waitsFor -> actualB isnt null
-      runs ->
-        expect(actualA).toBe @error
-        expect(actualB).toBe 'queue-name'
+      @subject.queue().catch (actual) =>
+        expect(actual).toBe @error
+      .then =>
+        @channel.assertQueue.andCallFake (queue) -> bluebird.resolve queue: 'queue-name'
+        @subject.queue()
+      .then (actual) ->
+        expect(actual).toBe 'queue-name'
+        done()

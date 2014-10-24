@@ -4,9 +4,9 @@ amqp = require 'amqplib'
 util = require 'util'
 AmqpPublisher = require '../lib/amqp/pub-sub/AmqpPublisher'
 
-topic = process.argv[2] ? 'default-topic'
-sleep = process.argv[3] ? 10000
-uri = process.argv[4] ? 'amqp://localhost/'
+uri = process.argv[2] ? 'amqp://localhost'
+topic = process.argv[3] ? 'default-topic'
+sleep = process.argv[4] ? 10000
 
 amqp.connect uri
   .then (connection) -> connection.createChannel()

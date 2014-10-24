@@ -1,4 +1,4 @@
-{Promise} = require 'bluebird'
+bluebird = require 'bluebird'
 
 module.exports = class DeclarationManager
   constructor: (@channel) ->
@@ -8,7 +8,7 @@ module.exports = class DeclarationManager
   exchange: ->
     return @_exchange if @_exchange? and not @_exchange.isRejected()
 
-    @_exchange = Promise.resolve \
+    @_exchange = bluebird.resolve \
       @channel.assertExchange 'overpass/pubsub', 'topic',
         durable: false
         autoDelete: false
@@ -17,7 +17,7 @@ module.exports = class DeclarationManager
   queue: ->
     return @_queue if @_queue? and not @_queue.isRejected()
 
-    @_queue = Promise.resolve \
+    @_queue = bluebird.resolve \
       @channel.assertQueue null,
         durable: false
         exclusive: true

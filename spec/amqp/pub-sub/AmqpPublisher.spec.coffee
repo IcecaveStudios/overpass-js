@@ -1,4 +1,4 @@
-{Promise} = require 'bluebird'
+bluebird = require 'bluebird'
 requireHelper = require '../../require-helper'
 AmqpPublisher = requireHelper 'amqp/pub-sub/AmqpPublisher'
 DeclarationManager = requireHelper 'amqp/pub-sub/DeclarationManager'
@@ -24,20 +24,13 @@ describe 'amqp.pub-sub.AmqpPublisher', ->
     expect(@subject.serialization).toEqual new JsonSerialization
 
   describe 'publish', ->
-    it 'publishes messages correctly', ->
+    it 'publishes messages correctly', (done) ->
       publishedPayload = null
-      @channel.publish.andCallFake (exchange, topic, payload) ->
-        publishedPayload = payload
-        Promise.resolve true
-      @declarationManager.exchange.andCallFake -> Promise.resolve 'exchange-name'
-      actual = null
-      payload =
-        a: 'b'
-        c: 'd'
-      runs -> @subject.publish('topic-name', payload).then (result) -> actual = result
+      @channel.publish.andCallFake (exchange, topic, payload) -> publishedPayload = payload
+      @declarationManager.exchange.andCallFake -> bluebird.resolve 'exchange-name'
+      payload = a: 'b', c: 'd'
 
-      waitsFor -> actual isnt null
-      runs ->
-        expect(actual).toBe true
+      @subject.publish('topic-name', payload).then =>
         expect(@channel.publish).toHaveBeenCalledWith 'exchange-name', 'topic-name', jasmine.any(Buffer)
         expect(publishedPayload.toString()).toBe '{"a":"b","c":"d"}'
+        done()
