@@ -14,8 +14,7 @@ describe 'amqp.pub-sub.DeclarationManager', ->
 
   describe 'exchange', ->
     beforeEach ->
-      @channel.assertExchange.andCallFake (exchange) ->
-        Promise.resolve exchange: exchange
+      @channel.assertExchange.andCallFake (exchange) -> Promise.resolve exchange: exchange
 
     it 'delares the exchange correctly', ->
       actual = null
@@ -59,8 +58,7 @@ describe 'amqp.pub-sub.DeclarationManager', ->
         @subject.exchange().catch (error) -> actualA = error
       waitsFor -> actualA isnt null
       runs ->
-        @channel.assertExchange.andCallFake (exchange) ->
-          Promise.resolve exchange: exchange
+        @channel.assertExchange.andCallFake (exchange) -> Promise.resolve exchange: exchange
         @subject.exchange().then (exchange) -> actualB = exchange
 
       waitsFor -> actualB isnt null
@@ -114,8 +112,7 @@ describe 'amqp.pub-sub.DeclarationManager', ->
         @subject.queue().catch (error) -> actualA = error
       waitsFor -> actualA isnt null
       runs ->
-        @channel.assertQueue.andCallFake () ->
-          Promise.resolve queue: 'queue-name'
+        @channel.assertQueue.andCallFake () -> Promise.resolve queue: 'queue-name'
         @subject.queue().then (queue) -> actualB = queue
 
       waitsFor -> actualB isnt null

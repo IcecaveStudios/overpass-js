@@ -11,9 +11,6 @@ describe 'amqp.pub-sub.AmqpPublisher', ->
     @serialization = new JsonSerialization()
     @subject = new AmqpPublisher @channel, @declarationManager, @serialization
 
-    @channel.publish.andCallFake -> Promise.resolve true
-    @declarationManager.exchange.andCallFake -> Promise.resolve 'exchange-name'
-
   it 'stores the supplied dependencies', ->
     expect(@subject.channel).toBe @channel
     expect(@subject.declarationManager).toBe @declarationManager
@@ -28,16 +25,19 @@ describe 'amqp.pub-sub.AmqpPublisher', ->
 
   describe 'publish', ->
     it 'publishes messages correctly', ->
+      publishedPayload = null
+      @channel.publish.andCallFake (exchange, topic, payload) ->
+        publishedPayload = payload
+        Promise.resolve true
+      @declarationManager.exchange.andCallFake -> Promise.resolve 'exchange-name'
       actual = null
       payload =
         a: 'b'
         c: 'd'
-      runs -> @subject.publish('topic-name', payload).then (result) ->
-        actual = result
+      runs -> @subject.publish('topic-name', payload).then (result) -> actual = result
 
       waitsFor -> actual isnt null
       runs ->
         expect(actual).toBe true
-        expect(@channel.publish).toHaveBeenCalledWith 'exchange-name',
-          'topic-name',
-          '{"a":"b","c":"d"}'
+        expect(@channel.publish).toHaveBeenCalledWith 'exchange-name', 'topic-name', jasmine.any(Buffer)
+        expect(publishedPayload.toString()).toBe '{"a":"b","c":"d"}'

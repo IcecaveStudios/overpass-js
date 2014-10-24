@@ -7,11 +7,11 @@ describe 'serialization.JsonSerialization', ->
 
   describe 'serialize', ->
     it 'serializes payloads into JSON', ->
-      expect(@subject.serialize({})).toBe '{}'
-      expect(@subject.serialize([])).toBe '[]'
-      expect(@subject.serialize([1, 'false', false])).toBe '[1,"false",false]'
-      expect(@subject.serialize(x: 5)).toBe '{"x":5}'
-      expect(@subject.serialize([1, '2'])).toBe '[1,"2"]'
+      expect(@subject.serialize({}).toString()).toBe '{}'
+      expect(@subject.serialize([]).toString()).toBe '[]'
+      expect(@subject.serialize([1, 'false', false]).toString()).toBe '[1,"false",false]'
+      expect(@subject.serialize(x: 5).toString()).toBe '{"x":5}'
+      expect(@subject.serialize([1, '2']).toString()).toBe '[1,"2"]'
 
     it 'throws an error when supplied with invalid input', ->
       expected = new Error 'Payload must be an object or an array.'
@@ -31,7 +31,7 @@ describe 'serialization.JsonSerialization', ->
       expect(@subject.unserialize('[1,"2"]')).toEqual [1, '2']
 
     it 'throws an error when supplied with invalid syntax', ->
-      expect(=> @subject.unserialize('{')).toThrow new SyntaxError 'Unexpected end of input'
+      expect(=> @subject.unserialize('{')).toThrow new Error 'Could not unserialize payload.'
 
     it 'throws an error when supplied with an invalid payload', ->
       expected = new Error 'Payload must be an object or an array.'
@@ -39,14 +39,14 @@ describe 'serialization.JsonSerialization', ->
       expect(=> @subject.unserialize('true')).toThrow expected
       expect(=> @subject.unserialize('null')).toThrow expected
       expect(=> @subject.unserialize('"foo"')).toThrow expected
+      expect(=> @subject.unserialize(true)).toThrow expected
+      expect(=> @subject.unserialize(1)).toThrow expected
 
     it 'throws an error when supplied with invalid input', ->
       expected = new Error 'Could not unserialize payload.'
 
       expect(=> @subject.unserialize(null)).toThrow expected
       expect(=> @subject.unserialize(undefined)).toThrow expected
-      expect(=> @subject.unserialize(true)).toThrow expected
-      expect(=> @subject.unserialize(1)).toThrow expected
       expect(=> @subject.unserialize([])).toThrow expected
       expect(=> @subject.unserialize({})).toThrow expected
       expect(=> @subject.unserialize(->)).toThrow expected

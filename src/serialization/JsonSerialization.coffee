@@ -3,14 +3,15 @@ module.exports = class JsonSerialization
     if typeof payload not in ['object', 'array'] or payload is null
       throw new Error 'Payload must be an object or an array.'
 
-    JSON.stringify payload
+    new Buffer JSON.stringify payload
 
   unserialize: (buffer) ->
-    throw new Error('Could not unserialize payload.') if typeof buffer isnt 'string'
-
-    payload = JSON.parse buffer
+    try
+      payload = JSON.parse buffer.toString()
+    catch
+      throw new Error 'Could not unserialize payload.'
 
     if typeof payload not in ['object', 'array'] or payload is null
-      throw new Error('Payload must be an object or an array.')
+      throw new Error 'Payload must be an object or an array.'
 
     payload

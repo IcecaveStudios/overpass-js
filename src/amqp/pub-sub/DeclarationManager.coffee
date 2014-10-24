@@ -8,7 +8,8 @@ module.exports = class DeclarationManager
   exchange: ->
     return @_exchange if @_exchange? and not @_exchange.isRejected()
 
-    @_exchange = @channel.assertExchange 'overpass.pubsub', 'topic',
+    @_exchange = Promise.resolve \
+      @channel.assertExchange 'overpass.pubsub', 'topic',
         durable: false
         autoDelete: false
       .then (response) -> response.exchange
@@ -16,7 +17,8 @@ module.exports = class DeclarationManager
   queue: ->
     return @_queue if @_queue? and not @_queue.isRejected()
 
-    @_queue = @channel.assertQueue null,
+    @_queue = Promise.resolve \
+      @channel.assertQueue null,
         durable: false
         exclusive: true
       .then (response) -> response.queue
