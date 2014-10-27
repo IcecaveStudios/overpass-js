@@ -4,18 +4,18 @@ amqp = require 'amqplib'
 util = require 'util'
 AmqpPublisher = require '../lib/amqp/pub-sub/AmqpPublisher'
 
-uri = process.argv[2] ? 'amqp://localhost'
+sleep = process.argv[2] ? 1
 topic = process.argv[3] ? 'default-topic'
-sleep = process.argv[4] ? 10000
+uri = process.argv[4] ? 'amqp://localhost'
 
 amqp.connect uri
   .then (connection) -> connection.createChannel()
   .then (channel) ->
     publisher = new AmqpPublisher channel
-    payloadCounter = 1
+    payloadCounter = 0
     publish = ->
-      publisher.publish topic, counter: payloadCounter++
-      console.log util.format '[publisher] ==> %s %s', topic, payloadCounter
-
-    setInterval publish, Math.round sleep / 1000
+      publisher.publish topic, counter: ++payloadCounter
+      .then -> console.log util.format '[publisher] ==> %s %s', topic, payloadCounter
+    publish()
+    setInterval publish, Math.round sleep * 1000
 

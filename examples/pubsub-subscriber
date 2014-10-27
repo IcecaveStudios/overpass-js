@@ -1,0 +1,20 @@
+#!/usr/bin/env coffee
+
+amqp = require 'amqplib'
+{usleep} = require 'sleep'
+util = require 'util'
+AmqpSubscriber = require '../lib/amqp/pub-sub/AmqpSubscriber'
+
+sleep = process.argv[2] ? 0
+topic = process.argv[3] ? '*'
+uri = process.argv[4] ? 'amqp://localhost'
+
+amqp.connect uri
+  .then (connection) -> connection.createChannel()
+  .then (channel) ->
+    subscriber = new AmqpSubscriber channel
+    subscriber.on 'message', (topic, payload) ->
+      console.log util.format '[subscriber] <== %s %s', topic, payload.counter
+      usleep sleep * 1000000 if sleep > 0
+    subscriber.subscribe topic
+
