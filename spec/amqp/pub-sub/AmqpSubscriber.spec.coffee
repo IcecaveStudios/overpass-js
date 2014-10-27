@@ -11,9 +11,13 @@ describe 'amqp.pub-sub.AmqpSubscriber', ->
     @serialization = new JsonSerialization()
     @subject = new AmqpSubscriber @channel, @declarationManager, @serialization
 
+    @consumeCallback = null
+
     @declarationManager.queue.andCallFake -> bluebird.resolve 'queue-name'
     @declarationManager.exchange.andCallFake -> bluebird.resolve 'exchange-name'
-    @channel.consume.andCallFake -> bluebird.resolve consumerTag: 'consumer-tag'
+    @channel.consume.andCallFake (queue, callback) =>
+      @consumeCallback = callback
+      bluebird.resolve consumerTag: 'consumer-tag'
     @channel.cancel.andCallFake -> bluebird.resolve()
     @error = new Error 'Error message.'
 
@@ -261,6 +265,30 @@ describe 'amqp.pub-sub.AmqpSubscriber', ->
         done()
 
   describe '_consume', ->
+    it 'emits generic message events', (done) ->
+      @subject.on 'message', (type, payload) ->
+        expect(type).toBe 'routing-key'
+        expect(payload).toEqual a: 'b', c: 'd'
+        done()
+
+      @subject._consume().then =>
+        @consumeCallback
+          fields:
+            routingKey: 'routing-key'
+          content: new Buffer '{"a":"b","c":"d"}'
+
+    it 'emits message events by routing key', (done) ->
+      @subject.on 'message.routing-key', (type, payload) ->
+        expect(type).toBe 'routing-key'
+        expect(payload).toEqual a: 'b', c: 'd'
+        done()
+
+      @subject._consume().then =>
+        @consumeCallback
+          fields:
+            routingKey: 'routing-key'
+          content: new Buffer '{"a":"b","c":"d"}'
+
     it 'can consume after a pending cancel', (done) ->
       @subject._consume()
       @subject._cancelConsume()

@@ -111,7 +111,10 @@ module.exports = class AmqpSubscriber extends EventEmitter
   _doConsume: ->
     consumer = @declarationManager.queue().then (queue) =>
       @channel.consume queue, (message) =>
-        @emit 'message', @serialization.unserialize message.content
+        type = message.fields.routingKey
+        payload = @serialization.unserialize message.content
+        @emit 'message', type, payload
+        @emit 'message.' + type, type, payload
 
     consumer
       .then (response) =>
