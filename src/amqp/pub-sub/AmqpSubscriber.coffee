@@ -15,11 +15,6 @@ module.exports = class AmqpSubscriber extends EventEmitter
     @_consumerState = 'detached'
     @_consumerTag = null
 
-    @on 'newListener', (event) =>
-      @_onMessageListenerAdded() if event is 'message'
-    @on 'removeListener', (event) =>
-      @_onMessageListenerRemoved() if event is 'message'
-
   subscribe: (topic) ->
     topic = @_normalizeTopic topic
 
@@ -51,28 +46,29 @@ module.exports = class AmqpSubscriber extends EventEmitter
         @_promises[topic]
 
   _doSubscribe: (topic) ->
-    subscription = bluebird.join \
+    @_consume()
+    .then => bluebird.join( \
       @declarationManager.queue(),
       @declarationManager.exchange(),
       (queue, exchange) => @channel.bindQueue queue, exchange, topic
-
-    subscription
-      .then => @_setState topic, 'subscribed'
-      .catch (error) =>
-        @_setState topic, 'unsubscribed'
-        throw error
+    ).then => @_setState(topic, 'subscribed')
+    .catch (error) =>
+      @_setState topic, 'unsubscribed'
+      throw error
 
   _doUnsubscribe: (topic) ->
-    unsubscription = bluebird.join \
+    bluebird.join( \
       @declarationManager.queue(),
       @declarationManager.exchange(),
       (queue, exchange) => @channel.unbindQueue queue, exchange, topic
-
-    unsubscription
-      .then => @_setState topic, 'unsubscribed'
-      .catch (error) =>
-        @_setState topic, 'subscribed'
-        throw error
+    ).then => @_setState topic, 'unsubscribed'
+    .then =>
+      if Object.keys(@_topicStates).length < 1
+        @_cancelConsume()
+      else return
+    .catch (error) =>
+      @_setState topic, 'subscribed'
+      throw error
 
   _normalizeTopic: (topic) ->
     topic.replace(/\*/g, '#').replace /\?/g, '*'
@@ -85,11 +81,6 @@ module.exports = class AmqpSubscriber extends EventEmitter
       delete @_topicStates[topic]
     else
       @_topicStates[topic] = state
-
-  _onMessageListenerAdded: -> @_consume()
-
-  _onMessageListenerRemoved: ->
-    @_cancelConsume() if EventEmitter.listenerCount(@, 'message') < 1
 
   _consume: ->
     switch @_consumerState
@@ -108,10 +99,10 @@ module.exports = class AmqpSubscriber extends EventEmitter
     switch @_consumerState
       when 'consuming'
         @_consumerState = 'cancelling'
-        @_consumer = @_doCancel()
+        @_consumer = @_doCancelConsume()
       when 'attaching'
         @_consumerState = 'cancelling'
-        @_consumer = @_consumer.then => @_doCancel()
+        @_consumer = @_consumer.then => @_doCancelConsume()
       when 'detached'
         bluebird.resolve()
       when 'cancelling'
@@ -130,12 +121,12 @@ module.exports = class AmqpSubscriber extends EventEmitter
         @_consumerState = 'detached'
         throw error
 
-  _doCancel: ->
+  _doCancelConsume: ->
     cancel = @channel.cancel @_consumerTag
     cancel
       .then =>
-        console.log 'finished detaching'
         @_consumerState = 'detached'
         @_consumerTag = null
       .catch (error) =>
         @_consumerState = 'consuming'
+        throw error

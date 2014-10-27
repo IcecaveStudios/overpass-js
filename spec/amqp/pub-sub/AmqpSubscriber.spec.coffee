@@ -13,6 +13,8 @@ describe 'amqp.pub-sub.AmqpSubscriber', ->
 
     @declarationManager.queue.andCallFake -> bluebird.resolve 'queue-name'
     @declarationManager.exchange.andCallFake -> bluebird.resolve 'exchange-name'
+    @channel.consume.andCallFake -> bluebird.resolve consumerTag: 'consumer-tag'
+    @channel.cancel.andCallFake -> bluebird.resolve()
     @error = new Error 'Error message.'
 
   it 'stores the supplied dependencies', ->
@@ -120,6 +122,27 @@ describe 'amqp.pub-sub.AmqpSubscriber', ->
         expect(@subject._state 'topic-name').toBe 'subscribed'
         done()
 
+    it 'starts consuming when subscriptions are added concurrently', (done) ->
+      @subject.subscribe 'topic-a'
+      @subject.subscribe 'topic-b'
+
+      @subject._consumer.then =>
+        expect(@channel.consume).toHaveBeenCalledWith 'queue-name', jasmine.any(Function)
+        expect(@channel.consume.calls.length).toBe 1
+        expect(@subject._consumerTag).toBe 'consumer-tag'
+        expect(@subject._consumerState).toBe 'consuming'
+        done()
+
+    it 'starts consuming when subscriptions are added sequentially', (done) ->
+      @subject.subscribe('topic-a').then => @subject.subscribe 'topic-b'
+
+      @subject._consumer.then =>
+        expect(@channel.consume).toHaveBeenCalledWith 'queue-name', jasmine.any(Function)
+        expect(@channel.consume.calls.length).toBe 1
+        expect(@subject._consumerTag).toBe 'consumer-tag'
+        expect(@subject._consumerState).toBe 'consuming'
+        done()
+
   describe 'unsubscribe', ->
     it 'unbinds correctly', (done) ->
       bluebird.join \
@@ -211,47 +234,12 @@ describe 'amqp.pub-sub.AmqpSubscriber', ->
         expect(@subject._state 'topic-name').toBe 'unsubscribed'
         done()
 
-  describe 'message events', ->
-    beforeEach ->
-      @channel.consume.andCallFake => bluebird.resolve consumerTag: 'consumer-tag'
-      @channel.cancel.andCallFake => bluebird.resolve()
+    it 'stops consuming when all subscriptions are removed concurrently', (done) ->
+      @subject.subscribe 'topic-a'
+      @subject.subscribe 'topic-b'
+      @subject.unsubscribe 'topic-a'
 
-    it 'starts consuming when message listeners are attached concurrently', (done) ->
-      @subject.on 'message', (message) ->
-      @subject.on 'message', (message) ->
-
-      @subject._consumer.then =>
-        expect(@channel.consume).toHaveBeenCalledWith 'queue-name', jasmine.any(Function)
-        expect(@channel.consume.calls.length).toBe 1
-        expect(@subject._consumerTag).toBe 'consumer-tag'
-        expect(@subject._consumerState).toBe 'consuming'
-        done()
-
-    it 'starts consuming when message listeners are attached sequentially', (done) ->
-      @subject.on 'message', (message) ->
-      @subject._consumer.then => @subject.on 'message', (message) ->
-
-      @subject._consumer.then =>
-        expect(@channel.consume).toHaveBeenCalledWith 'queue-name', jasmine.any(Function)
-        expect(@channel.consume.calls.length).toBe 1
-        expect(@subject._consumerTag).toBe 'consumer-tag'
-        expect(@subject._consumerState).toBe 'consuming'
-        done()
-
-    it 'does not start consuming when non-message listeners are attached', (done) ->
-      @subject.on 'a', ->
-      @subject.on 'b', ->
-
-      expect(@channel.consume.calls.length).toBe 0
-      expect(@subject._consumerState).toBe 'detached'
-      done()
-
-    it 'stops consuming when all message listeners are removed concurrently', (done) ->
-      @subject.on 'message', (message) ->
-      @subject.on 'message', (message) ->
-      @subject.removeAllListeners 'message'
-
-      @subject._consumer.then =>
+      @subject.unsubscribe('topic-b').then =>
         expect(@channel.consume).toHaveBeenCalledWith 'queue-name', jasmine.any(Function)
         expect(@channel.consume.calls.length).toBe 1
         expect(@channel.cancel).toHaveBeenCalledWith 'consumer-tag'
@@ -259,14 +247,11 @@ describe 'amqp.pub-sub.AmqpSubscriber', ->
         expect(@subject._consumerState).toBe 'detached'
         done()
 
-    it 'stops consuming when all message listeners are removed sequentially', (done) ->
-      @subject.on 'message', (message) ->
-      @subject._consumer.then =>
-        @subject.on 'message', (message) ->
-        bluebird.resolve @subject._consumer
-      .then =>
-        @subject.removeAllListeners 'message'
-        bluebird.resolve @subject._consumer
+    it 'stops consuming when all subscriptions are removed sequentially', (done) ->
+      @subject.subscribe('topic-a')
+      .then => @subject.subscribe('topic-b')
+      .then => @subject.unsubscribe('topic-a')
+      .then => @subject.unsubscribe('topic-b')
       .then =>
         expect(@channel.consume).toHaveBeenCalledWith 'queue-name', jasmine.any(Function)
         expect(@channel.consume.calls.length).toBe 1
@@ -275,16 +260,33 @@ describe 'amqp.pub-sub.AmqpSubscriber', ->
         expect(@subject._consumerState).toBe 'detached'
         done()
 
-    it 'does not stop consuming when non-message listeners are removed', (done) ->
-      @subject.on 'message', (message) ->
-      @subject.on 'a', (message) ->
-      @subject.on 'a', (message) ->
-      @subject.removeAllListeners 'a'
+  describe '_consume', ->
+    it 'can consume after a pending cancel', (done) ->
+      @subject._consume()
+      @subject._cancelConsume()
 
-      @subject._consumer.then =>
+      @subject._consume().then =>
         expect(@channel.consume).toHaveBeenCalledWith 'queue-name', jasmine.any(Function)
-        expect(@channel.consume.calls.length).toBe 1
+        expect(@channel.consume.calls.length).toBe 2
+        expect(@channel.cancel).toHaveBeenCalledWith 'consumer-tag'
+        expect(@channel.cancel.calls.length).toBe 1
+        expect(@subject._consumerState).toBe 'consuming'
+        done()
+
+  describe '_cancelConsume', ->
+    it 'correctly handles cancellation when already detatched', (done) ->
+      @subject._cancelConsume().then =>
+        expect(@channel.consume.calls.length).toBe 0
         expect(@channel.cancel.calls.length).toBe 0
-        expect(@subject._consumerTag).toBe 'consumer-tag'
+        expect(@subject._consumerState).toBe 'detached'
+        done()
+
+    it 'correctly handles a failure', (done) ->
+      @channel.cancel.andCallFake => bluebird.reject @error
+
+      @subject._consume()
+      .then => @subject._cancelConsume()
+      .catch (actual) =>
+        expect(actual).toBe @error
         expect(@subject._consumerState).toBe 'consuming'
         done()
