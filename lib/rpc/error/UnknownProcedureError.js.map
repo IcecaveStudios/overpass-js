@@ -1,0 +1,10 @@
+{
+  "version": 3,
+  "file": "UnknownProcedureError.js",
+  "sourceRoot": "../../../src/rpc/error/",
+  "sources": [
+    "UnknownProcedureError.coffee"
+  ],
+  "names": [],
+  "mappings": "AAAA;AAAA,MAAA,mCAAA;IAAA;mSAAA;;AAAA,EAAA,YAAA,GAAe,OAAA,CAAQ,yBAAR,CAAf,CAAA;;AAAA,EAEA,MAAM,CAAC,OAAP,GAAuB;AACrB,4CAAA,CAAA;;AAAa,IAAA,+BAAE,aAAF,GAAA;AACX,MADY,IAAC,CAAA,gBAAA,aACb,CAAA;AAAA,MAAA,IAAC,CAAA,OAAD,GAAW,qBAAA,GAAwB,IAAC,CAAA,aAAzB,GAAyC,GAApD,CAAA;AAAA,MACA,IAAC,CAAA,YAAD,GAAgB,YAAY,CAAC,iBAD7B,CADW;IAAA,CAAb;;iCAAA;;KADmD,MAFrD,CAAA;AAAA"
+}

@@ -1,0 +1,10 @@
+{
+  "version": 3,
+  "file": "ExecutionError.js",
+  "sourceRoot": "../../../src/rpc/error/",
+  "sources": [
+    "ExecutionError.coffee"
+  ],
+  "names": [],
+  "mappings": "AAAA;AAAA,MAAA,4BAAA;IAAA;mSAAA;;AAAA,EAAA,YAAA,GAAe,OAAA,CAAQ,yBAAR,CAAf,CAAA;;AAAA,EAEA,MAAM,CAAC,OAAP,GAAuB;AACrB,qCAAA,CAAA;;AAAa,IAAA,wBAAE,OAAF,GAAA;AAAc,MAAb,IAAC,CAAA,UAAA,OAAY,CAAA;AAAA,MAAA,IAAC,CAAA,YAAD,GAAgB,YAAY,CAAC,SAA7B,CAAd;IAAA,CAAb;;0BAAA;;KAD4C,MAF9C,CAAA;AAAA"
+}

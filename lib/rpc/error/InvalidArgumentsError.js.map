@@ -1,0 +1,10 @@
+{
+  "version": 3,
+  "file": "InvalidArgumentsError.js",
+  "sourceRoot": "../../../src/rpc/error/",
+  "sources": [
+    "InvalidArgumentsError.coffee"
+  ],
+  "names": [],
+  "mappings": "AAAA;AAAA,MAAA,mCAAA;IAAA;mSAAA;;AAAA,EAAA,YAAA,GAAe,OAAA,CAAQ,yBAAR,CAAf,CAAA;;AAAA,EAEA,MAAM,CAAC,OAAP,GAAuB;AACrB,4CAAA,CAAA;;AAAa,IAAA,+BAAE,OAAF,GAAA;AAAc,MAAb,IAAC,CAAA,UAAA,OAAY,CAAA;AAAA,MAAA,IAAC,CAAA,YAAD,GAAgB,YAAY,CAAC,iBAA7B,CAAd;IAAA,CAAb;;iCAAA;;KADmD,MAFrD,CAAA;AAAA"
+}

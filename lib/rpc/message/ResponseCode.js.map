@@ -1,0 +1,10 @@
+{
+  "version": 3,
+  "file": "ResponseCode.js",
+  "sourceRoot": "../../../src/rpc/message/",
+  "sources": [
+    "ResponseCode.coffee"
+  ],
+  "names": [],
+  "mappings": "AAAA;AAAA,EAAA,MAAM,CAAC,OAAP,GACE;AAAA,IAAA,OAAA,EAAS,CAAT;AAAA,IACA,SAAA,EAAW,EADX;AAAA,IAEA,eAAA,EAAiB,EAFjB;AAAA,IAGA,iBAAA,EAAmB,EAHnB;AAAA,IAIA,iBAAA,EAAmB,EAJnB;GADF,CAAA;AAAA"
+}
