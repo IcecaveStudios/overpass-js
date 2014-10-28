@@ -24,11 +24,11 @@ describe 'serialization.JsonSerialization', ->
 
   describe 'unserialize', ->
     it 'unserializes JSON into payloads', ->
-      expect(@subject.unserialize('{}')).toEqual {}
-      expect(@subject.unserialize('[]')).toEqual []
-      expect(@subject.unserialize('[1,"false",false]')).toEqual [1, 'false', false]
-      expect(@subject.unserialize('{"x":5}')).toEqual x: 5
-      expect(@subject.unserialize('[1,"2"]')).toEqual [1, '2']
+      expect(@subject.unserialize(new Buffer '{}')).toEqual {}
+      expect(@subject.unserialize(new Buffer '[]')).toEqual []
+      expect(@subject.unserialize(new Buffer '[1,"false",false]')).toEqual [1, 'false', false]
+      expect(@subject.unserialize(new Buffer '{"x":5}')).toEqual x: 5
+      expect(@subject.unserialize(new Buffer '[1,"2"]')).toEqual [1, '2']
 
     it 'throws an error when supplied with invalid syntax', ->
       expect(=> @subject.unserialize('{')).toThrow new Error 'Could not unserialize payload.'
@@ -36,9 +36,9 @@ describe 'serialization.JsonSerialization', ->
     it 'throws an error when supplied with an invalid payload', ->
       expected = new Error 'Payload must be an object or an array.'
 
-      expect(=> @subject.unserialize('true')).toThrow expected
-      expect(=> @subject.unserialize('null')).toThrow expected
-      expect(=> @subject.unserialize('"foo"')).toThrow expected
+      expect(=> @subject.unserialize(new Buffer 'true')).toThrow expected
+      expect(=> @subject.unserialize(new Buffer 'null')).toThrow expected
+      expect(=> @subject.unserialize(new Buffer '"foo"')).toThrow expected
       expect(=> @subject.unserialize(true)).toThrow expected
       expect(=> @subject.unserialize(1)).toThrow expected
 
