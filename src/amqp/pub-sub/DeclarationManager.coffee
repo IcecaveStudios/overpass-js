@@ -10,8 +10,8 @@ module.exports = class DeclarationManager
 
     @_exchange = bluebird.resolve \
       @channel.assertExchange 'overpass/pubsub', 'topic',
-        durable: false
         autoDelete: false
+        durable: false
       .then (response) -> response.exchange
 
   queue: ->
@@ -19,6 +19,7 @@ module.exports = class DeclarationManager
 
     @_queue = bluebird.resolve \
       @channel.assertQueue null,
-        durable: false
         exclusive: true
+        autoDelete: true
+        durable: false
       .then (response) -> response.queue
