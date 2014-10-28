@@ -5,9 +5,10 @@ JsonSerialization = require '../../serialization/JsonSerialization'
 
 module.exports = class AmqpSubscriber extends EventEmitter
   constructor: (
-    @channel,
-    @declarationManager = new DeclarationManager(@channel),
+    @channel
+    @declarationManager = new DeclarationManager(@channel)
     @serialization = new JsonSerialization()
+    @logger = require 'winston'
   ) ->
     @_promises = {}
     @_topicStates = {}
@@ -52,6 +53,7 @@ module.exports = class AmqpSubscriber extends EventEmitter
       @declarationManager.exchange(),
       (queue, exchange) => @channel.bindQueue queue, exchange, topic
     ).then => @_setState(topic, 'subscribed')
+    .tap => @logger.debug 'Subscribed to topic "{topic}"', topic: topic
     .catch (error) =>
       @_setState topic, 'unsubscribed'
       throw error
@@ -66,6 +68,7 @@ module.exports = class AmqpSubscriber extends EventEmitter
       if Object.keys(@_topicStates).length < 1
         @_cancelConsume()
       else return
+    .tap => @logger.debug 'Unsubscribed from topic "{topic}"', topic: topic
     .catch (error) =>
       @_setState topic, 'subscribed'
       throw error
@@ -111,10 +114,14 @@ module.exports = class AmqpSubscriber extends EventEmitter
   _doConsume: ->
     consumer = @declarationManager.queue().then (queue) =>
       @channel.consume queue, (message) =>
-        type = message.fields.routingKey
-        payload = @serialization.unserialize message.content
-        @emit 'message', type, payload
-        @emit 'message.' + type, type, payload
+        topic = message.fields.routingKey
+        payloadString = message.content.toString()
+        payload = @serialization.unserialize payloadString
+        @emit 'message', topic, payload
+        @emit 'message.' + topic, topic, payload
+        @logger.debug 'Received {payload} from topic "{topic}"',
+          topic: topic
+          payload: payloadString
 
     consumer
       .then (response) =>

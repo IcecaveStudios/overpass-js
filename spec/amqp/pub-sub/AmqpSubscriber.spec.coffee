@@ -1,4 +1,5 @@
 bluebird = require 'bluebird'
+winston = require 'winston'
 requireHelper = require '../../require-helper'
 AmqpSubscriber = requireHelper 'amqp/pub-sub/AmqpSubscriber'
 DeclarationManager = requireHelper 'amqp/pub-sub/DeclarationManager'
@@ -9,7 +10,8 @@ describe 'amqp.pub-sub.AmqpSubscriber', ->
     @channel = jasmine.createSpyObj 'channel', ['bindQueue', 'unbindQueue', 'consume', 'cancel']
     @declarationManager = jasmine.createSpyObj 'declarationManager', ['queue', 'exchange']
     @serialization = new JsonSerialization()
-    @subject = new AmqpSubscriber @channel, @declarationManager, @serialization
+    @logger = jasmine.createSpyObj 'logger', ['debug']
+    @subject = new AmqpSubscriber @channel, @declarationManager, @serialization, @logger
 
     @consumeCallback = null
 
@@ -25,6 +27,7 @@ describe 'amqp.pub-sub.AmqpSubscriber', ->
     expect(@subject.channel).toBe @channel
     expect(@subject.declarationManager).toBe @declarationManager
     expect(@subject.serialization).toBe @serialization
+    expect(@subject.logger).toBe @logger
 
   it 'creates sensible default dependencies', ->
     @subject = new AmqpSubscriber @channel
@@ -32,6 +35,7 @@ describe 'amqp.pub-sub.AmqpSubscriber', ->
     expect(@subject.channel).toBe @channel
     expect(@subject.declarationManager).toEqual new DeclarationManager @channel
     expect(@subject.serialization).toEqual new JsonSerialization
+    expect(@subject.logger).toBe winston
 
   describe 'subscribe', ->
     it 'binds correctly', (done) ->
@@ -146,6 +150,14 @@ describe 'amqp.pub-sub.AmqpSubscriber', ->
         expect(@subject._consumerTag).toBe 'consumer-tag'
         expect(@subject._consumerState).toBe 'consuming'
         done()
+
+    it 'logs the details', (done) ->
+      @logger.debug.andCallFake (message, meta) ->
+        expect(message).toBe 'Subscribed to topic "{topic}"'
+        expect(meta).toEqual topic: 'topic-name'
+        done()
+
+      @subject.subscribe 'topic-name'
 
   describe 'unsubscribe', ->
     it 'unbinds correctly', (done) ->
@@ -264,6 +276,15 @@ describe 'amqp.pub-sub.AmqpSubscriber', ->
         expect(@subject._consumerState).toBe 'detached'
         done()
 
+    it 'logs the details', (done) ->
+      @subject.subscribe('topic-name').then =>
+        @logger.debug.andCallFake (message, meta) ->
+          expect(message).toBe 'Unsubscribed from topic "{topic}"'
+          expect(meta).toEqual topic: 'topic-name'
+          done()
+
+      @subject.unsubscribe 'topic-name'
+
   describe '_consume', ->
     it 'emits generic message events', (done) ->
       @subject.on 'message', (type, payload) ->
@@ -273,8 +294,7 @@ describe 'amqp.pub-sub.AmqpSubscriber', ->
 
       @subject._consume().then =>
         @consumeCallback
-          fields:
-            routingKey: 'routing-key'
+          fields: routingKey: 'routing-key'
           content: new Buffer '{"a":"b","c":"d"}'
 
     it 'emits message events by routing key', (done) ->
@@ -285,8 +305,7 @@ describe 'amqp.pub-sub.AmqpSubscriber', ->
 
       @subject._consume().then =>
         @consumeCallback
-          fields:
-            routingKey: 'routing-key'
+          fields: routingKey: 'routing-key'
           content: new Buffer '{"a":"b","c":"d"}'
 
     it 'can consume after a pending cancel', (done) ->
@@ -300,6 +319,20 @@ describe 'amqp.pub-sub.AmqpSubscriber', ->
         expect(@channel.cancel.calls.length).toBe 1
         expect(@subject._consumerState).toBe 'consuming'
         done()
+
+    it 'logs the details', (done) ->
+      @subject.subscribe('topic-name')
+      .then =>
+        @logger.debug.andCallFake (message, meta) ->
+          expect(message).toBe 'Received {payload} from topic "{topic}"'
+          expect(meta).toEqual
+            topic: 'routing-key'
+            payload: '{"a":"b","c":"d"}'
+          done()
+      .then =>
+        @consumeCallback
+          fields: routingKey: 'routing-key'
+          content: new Buffer '{"a":"b","c":"d"}'
 
   describe '_cancelConsume', ->
     it 'correctly handles cancellation when already detatched', (done) ->

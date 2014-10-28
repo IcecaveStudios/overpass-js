@@ -24,7 +24,8 @@
   },
   "dependencies": {
     "amqplib": "^0.3",
-    "bluebird": "^2.3"
+    "bluebird": "^2.3",
+    "winston": "^0.8"
   },
   "devDependencies": {
     "coffee-script": "^1.8",

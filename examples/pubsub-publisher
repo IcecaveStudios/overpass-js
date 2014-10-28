@@ -2,7 +2,11 @@
 
 amqp = require 'amqplib'
 util = require 'util'
+winston = require 'winston'
 AmqpPublisher = require '../lib/amqp/pub-sub/AmqpPublisher'
+
+winston.level = 'debug'
+winston.cli()
 
 sleep = process.argv[2] ? 1
 topic = process.argv[3] ? 'default-topic'
@@ -13,9 +17,6 @@ amqp.connect uri
   .then (channel) ->
     publisher = new AmqpPublisher channel
     payloadCounter = 0
-    publish = ->
-      publisher.publish topic, counter: ++payloadCounter
-      .then -> console.log util.format '[publisher] ==> %s %s', topic, payloadCounter
+    publish = -> publisher.publish topic, counter: ++payloadCounter
     publish()
     setInterval publish, Math.round sleep * 1000
-
