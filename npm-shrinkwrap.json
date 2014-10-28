@@ -56,6 +56,11 @@
       "from": "bluebird@>=2.3.0 <3.0.0",
       "resolved": "https://registry.npmjs.org/bluebird/-/bluebird-2.3.6.tgz"
     },
+    "enum": {
+      "version": "0.2.6",
+      "from": "enum@*",
+      "resolved": "https://registry.npmjs.org/enum/-/enum-0.2.6.tgz"
+    },
     "winston": {
       "version": "0.8.1",
       "from": "winston@*",

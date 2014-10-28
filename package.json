@@ -25,6 +25,7 @@
   "dependencies": {
     "amqplib": "^0.3",
     "bluebird": "^2.3",
+    "enum": "^0.2",
     "winston": "^0.8"
   },
   "devDependencies": {
@@ -39,7 +40,7 @@
     "grunt-jasmine-node": "^0.2",
     "grunt-newer": "^0.8",
     "grunt-open": "^0.2",
-    "sleep": "^1.1.8"
+    "sleep": "^1.1"
   },
   "licenses": [
     {

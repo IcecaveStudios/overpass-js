@@ -11,4 +11,4 @@ describe 'rpc.error.ExecutionError', ->
     expect(@subject.message).toBe @message
 
   it 'returns the correct response code', ->
-    expect(@subject.responseCode).toBe ResponseCode.EXCEPTION
+    expect(@subject.responseCode).toBe ResponseCode.ERROR
