@@ -12,7 +12,7 @@ describe 'amqp.pub-sub.DeclarationManager', ->
   it 'stores the supplied dependencies', ->
     expect(@subject.channel).toBe @channel
 
-  describe 'exchange', ->
+  describe 'exchange()', ->
     beforeEach ->
       @channel.assertExchange.andCallFake (exchange) -> bluebird.resolve exchange: exchange
 
@@ -52,7 +52,7 @@ describe 'amqp.pub-sub.DeclarationManager', ->
         expect(actual).toBe 'overpass/pubsub'
         done()
 
-  describe 'queue', ->
+  describe 'queue()', ->
     beforeEach ->
       @channel.assertQueue.andCallFake -> bluebird.resolve queue: 'queue-name'
 

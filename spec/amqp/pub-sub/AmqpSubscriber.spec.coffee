@@ -36,7 +36,7 @@ describe 'amqp.pub-sub.AmqpSubscriber', ->
     expect(@subject.serialization).toEqual new JsonSerialization
     expect(@subject.logger).toBe winston
 
-  describe 'subscribe', ->
+  describe 'subscribe()', ->
     it 'binds correctly', (done) ->
       bluebird.join \
         @subject.subscribe('topic.*.a'),
@@ -158,7 +158,7 @@ describe 'amqp.pub-sub.AmqpSubscriber', ->
 
       @subject.subscribe 'topic-name'
 
-  describe 'unsubscribe', ->
+  describe 'unsubscribe()', ->
     it 'unbinds correctly', (done) ->
       bluebird.join \
         @subject.subscribe('topic.*.a'),
@@ -284,7 +284,7 @@ describe 'amqp.pub-sub.AmqpSubscriber', ->
 
       @subject.unsubscribe 'topic-name'
 
-  describe '_consume', ->
+  describe '_consume()', ->
     it 'emits generic message events', (done) ->
       @subject.on 'message', (type, payload) ->
         expect(type).toBe 'routing-key'
@@ -333,7 +333,7 @@ describe 'amqp.pub-sub.AmqpSubscriber', ->
           fields: routingKey: 'routing-key'
           content: new Buffer '{"a":"b","c":"d"}'
 
-  describe '_cancelConsume', ->
+  describe '_cancelConsume()', ->
     it 'correctly handles cancellation when already detatched', (done) ->
       @subject._cancelConsume().then =>
         expect(@channel.consume.calls.length).toBe 0

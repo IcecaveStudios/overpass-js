@@ -9,13 +9,14 @@ describe 'amqp.rpc.DeclarationManager', ->
 
     @channel.assertExchange.andCallFake (exchange) -> bluebird.resolve exchange: exchange
     @channel.assertQueue.andCallFake (queue) -> bluebird.resolve queue: queue
+    @channel.bindQueue.andCallFake () -> bluebird.resolve()
 
     @error = new Error 'Error message.'
 
   it 'stores the supplied dependencies', ->
     expect(@subject.channel).toBe @channel
 
-  describe 'exchange', ->
+  describe 'exchange()', ->
     it 'delares the exchange correctly', (done) ->
       @subject.exchange().then (actual) =>
         expect(actual).toBe 'overpass/rpc'
@@ -52,7 +53,7 @@ describe 'amqp.rpc.DeclarationManager', ->
         expect(actual).toBe 'overpass/rpc'
         done()
 
-  describe 'requestQueue', ->
+  describe 'requestQueue()', ->
     it 'delares queues correctly', (done) ->
       @subject.requestQueue('procedureA').then (actual) =>
         expect(actual).toBe 'overpass/rpc/procedureA'
@@ -96,7 +97,7 @@ describe 'amqp.rpc.DeclarationManager', ->
         expect(actual).toBe 'overpass/rpc/procedureA'
         done()
 
-  describe 'responseQueue', ->
+  describe 'responseQueue()', ->
     beforeEach ->
       @channel.assertQueue.andCallFake -> bluebird.resolve queue: 'queue-name'
 

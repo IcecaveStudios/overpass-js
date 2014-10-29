@@ -26,7 +26,7 @@ describe 'amqp.pub-sub.AmqpPublisher', ->
     expect(@subject.serialization).toEqual new JsonSerialization
     expect(@subject.logger).toBe winston
 
-  describe 'publish', ->
+  describe 'publish()', ->
     beforeEach ->
       @declarationManager.exchange.andCallFake -> bluebird.resolve 'exchange-name'
 

@@ -5,7 +5,7 @@ describe 'serialization.JsonSerialization', ->
   beforeEach ->
     @subject = new JsonSerialization()
 
-  describe 'serialize', ->
+  describe 'serialize()', ->
     it 'serializes payloads into JSON', ->
       expect(@subject.serialize({}).toString()).toBe '{}'
       expect(@subject.serialize([]).toString()).toBe '[]'
@@ -22,7 +22,7 @@ describe 'serialization.JsonSerialization', ->
       expect(=> @subject.serialize(undefined)).toThrow expected
       expect(=> @subject.serialize('foo')).toThrow expected
 
-  describe 'unserialize', ->
+  describe 'unserialize()', ->
     it 'unserializes JSON into payloads', ->
       expect(@subject.unserialize(new Buffer '{}')).toEqual {}
       expect(@subject.unserialize(new Buffer '[]')).toEqual []

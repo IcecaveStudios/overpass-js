@@ -13,14 +13,14 @@ describe 'rpc.message.serialization.MessageSerialization', ->
   it 'stores the supplied dependencies', ->
     expect(@subject.serialization).toBe @serialization
 
-  describe 'serializeRequest', ->
+  describe 'serializeRequest()', ->
     it 'serializes requests into JSON', ->
       request = new Request 'procedureName', ['a', b: 'c', ['d', 'e']]
       actual = @subject.serializeRequest(request).toString()
 
       expect(actual).toBe '["procedureName",["a",{"b":"c"},["d","e"]]]'
 
-  describe 'unserializeResponse', ->
+  describe 'unserializeResponse()', ->
     it 'unserializes responses', ->
       buffer = new Buffer '[0,["a",{"b":"c"},["d","e"]]]'
       actual = @subject.unserializeResponse buffer

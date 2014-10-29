@@ -1,7 +1,9 @@
 bluebird = require 'bluebird'
+{Promise} = require 'bluebird'
+{TimeoutError} = require 'bluebird'
 DeclarationManager = require './DeclarationManager'
 MessageSerialization = require '../../rpc/message/serialization/MessageSerialization'
-Request = require '../../rpc/message//Request'
+Request = require '../../rpc/message/Request'
 
 module.exports = class AmqpRpcClient
   constructor: (
@@ -15,7 +17,7 @@ module.exports = class AmqpRpcClient
     @_requests = {}
     @_id = 0
 
-  call: (name, args) ->
+  invokeArray: (name, args) ->
     @_initialize().then =>
       id = ++@_id
       request = new Request name, args
@@ -23,6 +25,19 @@ module.exports = class AmqpRpcClient
       @logger.debug 'RPC #{id} {request}', id: id, request: request.toString()
 
       @_send(request, id)
+      .then (response) =>
+        @logger.debug 'RPC #{id} {request} -> {response}',
+          id: id
+          request: request.toString()
+          response: response.toString()
+        response
+      .catch TimeoutError, (e) =>
+        message = 'RPC #{id} {request} -> <timed out after {timeout} seconds>'
+        @logger.debug message,
+          id: id
+          request: request.toString()
+          timeout: @timeout
+        throw e
 
   _initialize: ->
     return @_initializer if @_initializer? and not @_initializer.isRejected()
@@ -33,7 +48,7 @@ module.exports = class AmqpRpcClient
   _send: (request, id) ->
     payload = @serialization.serializeRequest request
 
-    promise = new bluebird.Promise (resolve, reject) ->
+    promise = new Promise (resolve, reject) =>
       @_requests[id] = {resolve, reject}
 
     timeout = Math.round @timeout * 1000
@@ -47,13 +62,13 @@ module.exports = class AmqpRpcClient
           replyTo: responseQueue
           correlationId: id
           expiration: timeout
-    .catch (e) ->
+    .catch (e) =>
       @_requests[id].reject e
       throw e
 
     promise
       .timeout timeout, 'RPC request timed out.'
-      .finally ->
+      .finally =>
         delete @_requests[id]
 
   _recv: (message) ->
