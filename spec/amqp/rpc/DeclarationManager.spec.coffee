@@ -4,9 +4,10 @@ DeclarationManager = requireHelper 'amqp/rpc/DeclarationManager'
 
 describe 'amqp.rpc.DeclarationManager', ->
   beforeEach ->
-    @channel = jasmine.createSpyObj 'channel', ['assertExchange', 'assertQueue']
+    @channel = jasmine.createSpyObj 'channel', ['assertExchange', 'assertQueue', 'bindQueue']
     @subject = new DeclarationManager @channel
 
+    @channel.assertExchange.andCallFake (exchange) -> bluebird.resolve exchange: exchange
     @channel.assertQueue.andCallFake (queue) -> bluebird.resolve queue: queue
 
     @error = new Error 'Error message.'
@@ -15,9 +16,6 @@ describe 'amqp.rpc.DeclarationManager', ->
     expect(@subject.channel).toBe @channel
 
   describe 'exchange', ->
-    beforeEach ->
-      @channel.assertExchange.andCallFake (exchange) -> bluebird.resolve exchange: exchange
-
     it 'delares the exchange correctly', (done) ->
       @subject.exchange().then (actual) =>
         expect(actual).toBe 'overpass/rpc'
@@ -62,6 +60,7 @@ describe 'amqp.rpc.DeclarationManager', ->
           exclusive: false
           autoDelete: false
           durable: false
+        expect(@channel.bindQueue).toHaveBeenCalledWith 'overpass/rpc/procedureA', 'overpass/rpc', 'procedureA'
         done()
 
     it 'only declares one queue per procedure', (done) ->

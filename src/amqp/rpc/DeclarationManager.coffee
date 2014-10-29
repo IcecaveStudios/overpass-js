@@ -20,12 +20,16 @@ module.exports = class DeclarationManager
       if not @_requestQueues[procedureName].isRejected()
         return @_requestQueues[procedureName]
 
-    @_requestQueues[procedureName] = bluebird.resolve \
-      @channel.assertQueue 'overpass/rpc/' + procedureName,
+    queue = 'overpass/rpc/' + procedureName
+
+    @_requestQueues[procedureName] = bluebird.join( \
+      @channel.assertQueue queue,
         exclusive: false
         autoDelete: false
         durable: false
-      .then (response) -> response.queue
+      @exchange(),
+      (response, exchange) => @channel.bindQueue queue, exchange, procedureName
+    ).then -> queue
 
   responseQueue: () ->
     if @_responseQueue? and not @_responseQueue.isRejected()

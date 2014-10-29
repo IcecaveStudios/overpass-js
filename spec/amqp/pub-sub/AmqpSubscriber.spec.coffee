@@ -32,7 +32,6 @@ describe 'amqp.pub-sub.AmqpSubscriber', ->
   it 'creates sensible default dependencies', ->
     @subject = new AmqpSubscriber @channel
 
-    expect(@subject.channel).toBe @channel
     expect(@subject.declarationManager).toEqual new DeclarationManager @channel
     expect(@subject.serialization).toEqual new JsonSerialization
     expect(@subject.logger).toBe winston
