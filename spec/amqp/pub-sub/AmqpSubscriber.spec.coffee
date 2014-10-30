@@ -13,6 +13,7 @@ describe 'amqp.pub-sub.AmqpSubscriber', ->
     @logger = jasmine.createSpyObj 'logger', ['debug']
     @subject = new AmqpSubscriber @channel, @declarationManager, @serialization, @logger
 
+    @error = new Error 'Error message.'
     @consumeCallback = null
 
     @declarationManager.queue.andCallFake -> bluebird.resolve 'queue-name'
@@ -21,7 +22,6 @@ describe 'amqp.pub-sub.AmqpSubscriber', ->
       @consumeCallback = callback
       bluebird.resolve consumerTag: 'consumer-tag'
     @channel.cancel.andCallFake -> bluebird.resolve()
-    @error = new Error 'Error message.'
 
   it 'stores the supplied dependencies', ->
     expect(@subject.channel).toBe @channel

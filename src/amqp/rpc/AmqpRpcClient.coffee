@@ -17,9 +17,9 @@ module.exports = class AmqpRpcClient
     @_requests = {}
     @_id = 0
 
-  invokeArray: (name, args) ->
+  invoke: (name, args...) ->
     @_initialize().then =>
-      id = ++@_id
+      id = (++@_id).toString()
       request = new Request name, args
 
       @logger.debug 'RPC #{id} {request}', id: id, request: request.toString()
@@ -30,14 +30,16 @@ module.exports = class AmqpRpcClient
           id: id
           request: request.toString()
           response: response.toString()
-        response
+        response.extract()
       .catch TimeoutError, (e) =>
         message = 'RPC #{id} {request} -> <timed out after {timeout} seconds>'
-        @logger.debug message,
+        @logger.warn message,
           id: id
           request: request.toString()
           timeout: @timeout
         throw e
+
+  invokeArray: (name, args) -> @invoke name, args...
 
   _initialize: ->
     return @_initializer if @_initializer? and not @_initializer.isRejected()
@@ -62,17 +64,14 @@ module.exports = class AmqpRpcClient
           replyTo: responseQueue
           correlationId: id
           expiration: timeout
-    .catch (e) =>
-      @_requests[id].reject e
-      throw e
+    .catch (e) => @_requests[id].reject e
 
     promise
       .timeout timeout, 'RPC request timed out.'
-      .finally =>
-        delete @_requests[id]
+      .finally => delete @_requests[id]
 
   _recv: (message) ->
-    id = message.properties.correlationId
+    id = message.properties.correlationId ? null
 
     if not id?
       return @logger.warn 'Received RPC response with no correlation ID'
@@ -81,8 +80,7 @@ module.exports = class AmqpRpcClient
       return @logger.warn 'Received RPC response with unknown correlation ID'
 
     try
-      response = @serialization.unserializeResponse(message.content).extract()
+      response = @serialization.unserializeResponse(message.content)
       @_requests[id].resolve response
     catch e
       @_requests[id].reject e
-      throw e

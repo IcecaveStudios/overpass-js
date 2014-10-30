@@ -23,7 +23,7 @@ module.exports = class MessageSerialization
     if not code = ResponseCode.get(code)
       throw new InvalidMessageError 'Response code is unrecognised.'
 
-    if code isnt ResponseCode.SUCCESS and value not instanceof String
+    if code isnt ResponseCode.SUCCESS and typeof value isnt 'string'
       throw new InvalidMessageError 'Response error message must be a string.'
 
     new Response code, value

@@ -1,0 +1,25 @@
+#!/usr/bin/env coffee
+
+amqp = require 'amqplib'
+assert = require 'assert'
+util = require 'util'
+winston = require 'winston'
+AmqpRpcClient = require '../lib/amqp/rpc/AmqpRpcClient'
+
+winston.level = 'debug'
+winston.cli()
+
+sleep = process.argv[2] ? 1
+timeout = process.argv[3] ? 5
+uri = process.argv[4] ? 'amqp://localhost'
+
+amqp.connect uri
+  .then (connection) -> connection.createChannel()
+  .then (channel) ->
+    client = new AmqpRpcClient channel
+    invoke = ->
+      value = Math.floor Math.random() * 100000
+      client.invokeArray('double', [value])
+      .then (result) -> assert.equal value * 2, result
+    invoke()
+    setInterval invoke, Math.round sleep * 1000
