@@ -12,7 +12,7 @@ was written for PHP. This package provides a JavaScript implementation.
 
 ## Message Brokers
 
-* [Rabbit MQ / AMQP](src/Amqp)
+* [Rabbit MQ / AMQP](src/amqp)
 * Redis (not yet implemented)
 
 ## Examples
