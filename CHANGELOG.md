@@ -1,5 +1,5 @@
-# Overpass for Node.js changelog
+# Overpass for Node.js Changelog
 
-## 0.1.0 (unreleased)
+## 0.1.0 (2014-11-19)
 
-- **[NEW]** Initial implementation
+* Initial release
