@@ -12,6 +12,7 @@
   "bugs": {
     "url": "https://github.com/IcecaveStudios/overpass-js/issues"
   },
+  "main": "./lib/index.js",
   "directories": {
     "lib": "./lib"
   },
@@ -26,6 +27,7 @@
     "amqplib": "^0.3",
     "bluebird": "^2.3",
     "enum": "^0.2",
+    "requireindex": "^1.1.0",
     "winston": "^0.8"
   },
   "devDependencies": {

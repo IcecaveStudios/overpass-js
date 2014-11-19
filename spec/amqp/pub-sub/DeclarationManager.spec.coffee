@@ -1,8 +1,8 @@
 bluebird = require 'bluebird'
 requireHelper = require '../../require-helper'
-DeclarationManager = requireHelper 'amqp/pub-sub/DeclarationManager'
+DeclarationManager = requireHelper 'amqp/pubsub/DeclarationManager'
 
-describe 'amqp.pub-sub.DeclarationManager', ->
+describe 'amqp.pubsub.DeclarationManager', ->
   beforeEach ->
     @channel = jasmine.createSpyObj 'channel', ['assertExchange', 'assertQueue']
     @subject = new DeclarationManager @channel

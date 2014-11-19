@@ -1,11 +1,11 @@
 bluebird = require 'bluebird'
 winston = require 'winston'
 requireHelper = require '../../require-helper'
-AmqpPublisher = requireHelper 'amqp/pub-sub/AmqpPublisher'
-DeclarationManager = requireHelper 'amqp/pub-sub/DeclarationManager'
+AmqpPublisher = requireHelper 'amqp/pubsub/AmqpPublisher'
+DeclarationManager = requireHelper 'amqp/pubsub/DeclarationManager'
 JsonSerialization = requireHelper 'serialization/JsonSerialization'
 
-describe 'amqp.pub-sub.AmqpPublisher', ->
+describe 'amqp.pubsub.AmqpPublisher', ->
   beforeEach ->
     @channel = jasmine.createSpyObj 'channel', ['publish']
     @declarationManager = jasmine.createSpyObj 'declarationManager', ['exchange']

@@ -1,7 +1,7 @@
 {
   "version": 3,
   "file": "AmqpSubscriber.js",
-  "sourceRoot": "../../../src/amqp/pub-sub/",
+  "sourceRoot": "../../../src/amqp/pubsub/",
   "sources": [
     "AmqpSubscriber.coffee"
   ],

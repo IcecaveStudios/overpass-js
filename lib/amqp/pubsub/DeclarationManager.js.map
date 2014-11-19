@@ -1,7 +1,7 @@
 {
   "version": 3,
   "file": "DeclarationManager.js",
-  "sourceRoot": "../../../src/amqp/pub-sub/",
+  "sourceRoot": "../../../src/amqp/pubsub/",
   "sources": [
     "DeclarationManager.coffee"
   ],
