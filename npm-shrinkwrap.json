@@ -1,6 +1,6 @@
 {
   "name": "overpass",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "dependencies": {
     "amqplib": {
       "version": "0.3.0",
