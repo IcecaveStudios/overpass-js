@@ -4,7 +4,7 @@ amqp = require 'amqplib'
 util = require 'util'
 winston = require 'winston'
 {usleep} = require 'sleep'
-AmqpSubscriber = require '../lib/amqp/pub-sub/AmqpSubscriber'
+AmqpSubscriber = require '../lib/amqp/pubsub/AmqpSubscriber'
 
 winston.level = 'debug'
 winston.cli()

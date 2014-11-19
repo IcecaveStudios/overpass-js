@@ -1,22 +1,25 @@
 #!/usr/bin/env coffee
 
-amqp = require 'amqplib'
-util = require 'util'
-winston = require 'winston'
-AmqpPublisher = require '../lib/amqp/pub-sub/AmqpPublisher'
+console.log require '..'
 
-winston.level = 'debug'
-winston.cli()
 
-sleep = process.argv[2] ? 1
-topic = process.argv[3] ? 'default-topic'
-uri = process.argv[4] ? 'amqp://localhost'
+# amqp = require 'amqplib'
+# util = require 'util'
+# winston = require 'winston'
+# AmqpPublisher = require '../lib/amqp/pubsub/AmqpPublisher'
 
-amqp.connect uri
-  .then (connection) -> connection.createChannel()
-  .then (channel) ->
-    publisher = new AmqpPublisher channel
-    payloadCounter = 0
-    publish = -> publisher.publish topic, counter: ++payloadCounter
-    publish()
-    setInterval publish, Math.round sleep * 1000
+# winston.level = 'debug'
+# winston.cli()
+
+# sleep = process.argv[2] ? 1
+# topic = process.argv[3] ? 'default-topic'
+# uri = process.argv[4] ? 'amqp://localhost'
+
+# amqp.connect uri
+#   .then (connection) -> connection.createChannel()
+#   .then (channel) ->
+#     publisher = new AmqpPublisher channel
+#     payloadCounter = 0
+#     publish = -> publisher.publish topic, counter: ++payloadCounter
+#     publish()
+#     setInterval publish, Math.round sleep * 1000

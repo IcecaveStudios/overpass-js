@@ -1,0 +1,10 @@
+{
+  "version": 3,
+  "file": "index.js",
+  "sourceRoot": "../../../../src/rpc/message/serialization/",
+  "sources": [
+    "index.coffee"
+  ],
+  "names": [],
+  "mappings": "AAAA;AAAA,EAAA,MAAM,CAAC,OAAP,GAAiB,OAAA,CAAQ,cAAR,CAAA,CAAwB,SAAxB,CAAjB,CAAA;AAAA"
+}
