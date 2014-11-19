@@ -32,4 +32,4 @@ was written for PHP. This package provides a JavaScript implementation.
 <!-- references -->
 [Build Status]: http://img.shields.io/travis/IcecaveStudios/overpass-js/develop.svg?style=flat-square
 [Test Coverage]: http://img.shields.io/coveralls/IcecaveStudios/overpass-js/develop.svg?style=flat-square
-[SemVer]: http://img.shields.io/:semver-0.0.0-red.svg?style=flat-square
+[SemVer]: http://img.shields.io/:semver-0.1.0-yellow.svg?style=flat-square
