@@ -1,6 +1,6 @@
 {
   "name": "overpass",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "dependencies": {
     "amqplib": {
       "version": "0.3.0",
@@ -60,6 +60,11 @@
       "version": "0.2.6",
       "from": "https://registry.npmjs.org/enum/-/enum-0.2.6.tgz",
       "resolved": "https://registry.npmjs.org/enum/-/enum-0.2.6.tgz"
+    },
+    "requireindex": {
+      "version": "1.1.0",
+      "from": "requireindex@*",
+      "resolved": "https://registry.npmjs.org/requireindex/-/requireindex-1.1.0.tgz"
     },
     "winston": {
       "version": "0.8.1",
