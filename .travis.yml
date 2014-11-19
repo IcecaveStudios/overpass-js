@@ -1,4 +1,16 @@
 language: node_js
+
 node_js:
     - '0.10'
+
 script: node_modules/.bin/grunt travis
+
+deploy:
+    provider: npm
+    email: james.harris@icecave.com.au
+    api_key:
+        secure: Oq5qD0dE2smboD2+cgrCA7C/l8w8nV1PY6Zer0gVy0lTOQY9hnURZ38xsEcuXt297ntFrOu4GOyKR6sheN2O9GtW1eatJips7RIW953c1OaKOMCY+J4LMTPk9kA9HJsIkr8iTg7UrsMb4v5qWjDPYF4KGmggWVcz1ALC5hdyQcA=
+    on:
+        repo: IcecaveStudios/overpass-js
+        all-branches: true
+        tags: true
