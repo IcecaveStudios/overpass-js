@@ -1,16 +1,16 @@
 {
   "name": "overpass",
-  "description": "Overpass for Node.js",
+  "description": "A basic pub/sub and RPC system.",
   "version": "0.0.0",
-  "homepage": "https://github.com/eloquent/overpass-nodejs",
+  "homepage": "https://github.com/IcecaveStudios/overpass-js",
   "author": "Erin Millard",
   "keywords": [],
   "repository": {
     "type": "git",
-    "url": "https://github.com/eloquent/overpass-nodejs.git"
+    "url": "https://github.com/IcecaveStudios/overpass-js.git"
   },
   "bugs": {
-    "url": "https://github.com/eloquent/overpass-nodejs/issues"
+    "url": "https://github.com/IcecaveStudios/overpass-js/issues"
   },
   "directories": {
     "lib": "./lib"
@@ -45,7 +45,7 @@
   "licenses": [
     {
       "type": "MIT",
-      "url": "https://raw.github.com/eloquent/overpass-nodejs/develop/LICENSE"
+      "url": "https://raw.github.com/IcecaveStudios/overpass-js/develop/LICENSE"
     }
   ]
 }

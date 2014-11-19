@@ -1,12 +1,35 @@
 # Overpass for Node.js
 
-[![The most recent stable version is 0.0.0][version-image]][Semantic versioning]
-[![Current build status image][build-image]][Current build status]
-[![Current coverage status image][coverage-image]][Current coverage status]
+[![Build Status]](https://travis-ci.org/IcecaveStudios/overpass-js)
+[![Test Coverage]](https://coveralls.io/r/IcecaveStudios/overpass-js?branch=develop)
+[![SemVer]](http://semver.org)
 
-[build-image]: http://img.shields.io/travis/ezzatron/overpass-nodejs/develop.svg "Current build status for the develop branch"
-[Current build status]: https://travis-ci.org/ezzatron/overpass-nodejs
-[coverage-image]: http://img.shields.io/coveralls/ezzatron/overpass-nodejs/develop.svg "Current test coverage for the develop branch"
-[Current coverage status]: https://coveralls.io/r/ezzatron/overpass-nodejs
-[Semantic versioning]: http://semver.org/
-[version-image]: http://img.shields.io/:semver-0.0.0-red.svg "This project uses semantic versioning"
+**Overpass** is a basic pub/sub and RPC system. The [original version](https://github.com/IcecaveStudios/overpass)
+was written for PHP. This package provides a JavaScript implementation.
+
+* Install via [NPM](http://npmjs.org) package [overpass](https://www.npmjs.org/package/overpass)
+* Read the [API documentation](http://icecavestudios.github.io/overpass-js/artifacts/documentation/api/)
+
+## Message Brokers
+
+* [Rabbit MQ / AMQP](src/Amqp)
+* Redis (not yet implemented)
+
+## Examples
+
+* Pub/Sub
+  * [Publisher](examples/pubsub-publisher)
+  * [Subscriber](examples/pubsub-subscriber)
+* RPC
+  * [Client](examples/rpc-client)
+
+## Contact us
+
+* Follow [@IcecaveStudios](https://twitter.com/IcecaveStudios) on Twitter
+* Visit the [Icecave Studios website](http://icecave.com.au)
+* Join `#icecave` on [irc.freenode.net](http://webchat.freenode.net?channels=icecave)
+
+<!-- references -->
+[Build Status]: http://img.shields.io/travis/IcecaveStudios/overpass-js/develop.svg?style=flat-square
+[Test Coverage]: http://img.shields.io/coveralls/IcecaveStudios/overpass-js/develop.svg?style=flat-square
+[SemVer]: http://img.shields.io/:semver-0.0.0-red.svg?style=flat-square
