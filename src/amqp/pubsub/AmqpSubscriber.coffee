@@ -1,4 +1,5 @@
 bluebird = require 'bluebird'
+regexEscape = require 'escape-string-regexp'
 {EventEmitter} = require 'events'
 DeclarationManager = require './DeclarationManager'
 JsonSerialization = require '../../serialization/JsonSerialization'
@@ -15,6 +16,10 @@ module.exports = class AmqpSubscriber extends EventEmitter
     @_consumer = null
     @_consumerState = 'detached'
     @_consumerTag = null
+    @_wildcardListeners = {}
+
+    @on 'newListener', @_onNewListener
+    @on 'removeListener', @_onRemoveListener
 
   subscribe: (topic) ->
     topic = @_normalizeTopic topic
@@ -117,8 +122,7 @@ module.exports = class AmqpSubscriber extends EventEmitter
         topic = message.fields.routingKey
         payloadString = message.content.toString()
         payload = @serialization.unserialize payloadString
-        @emit 'message', topic, payload
-        @emit 'message.' + topic, topic, payload
+        @_emit topic, payload
         @logger.debug 'Received {payload} from topic "{topic}"',
           topic: topic
           payload: payloadString
@@ -140,3 +144,37 @@ module.exports = class AmqpSubscriber extends EventEmitter
       .catch (error) =>
         @_consumerState = 'consuming'
         throw error
+
+  _emit: (topic, payload) ->
+    @emit 'message', topic, payload
+    @emit 'message.' + topic, topic, payload
+
+    for event, regex of @_wildcardListeners
+      if regex.test topic
+        @emit event, topic, payload
+
+  _onNewListener: (event, listener) ->
+    return if event of @_wildcardListeners
+
+    atoms = event.split '.'
+
+    return unless atoms.shift() is 'message'
+
+    isPattern = false
+    atoms = for atom in atoms
+        switch atom
+            when '*'
+                isPattern = true
+                '(.+)'
+            when '?'
+                isPattern = true
+                '([^.]+)'
+            else
+                regexEscape atom
+
+    if isPattern
+        pattern = "^#{atoms.join regexEscape '.'}$"
+        @_wildcardListeners[event] = new RegExp pattern
+
+  _onRemoveListener: (event, listener) ->
+    delete @_wildcardListeners[event] unless EventEmitter.listenerCount @, event

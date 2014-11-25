@@ -1,7 +1,7 @@
 {
   "name": "overpass",
   "description": "A basic pub/sub and RPC system.",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "homepage": "https://github.com/IcecaveStudios/overpass-js",
   "author": "Erin Millard",
   "keywords": [],
@@ -27,6 +27,7 @@
     "amqplib": "^0.3",
     "bluebird": "^2.3",
     "enum": "^0.2",
+    "escape-string-regexp": "^1.0.2",
     "requireindex": "^1.1.0",
     "winston": "^0.8"
   },
