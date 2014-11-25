@@ -307,6 +307,86 @@ describe 'amqp.pubsub.AmqpSubscriber', ->
           fields: routingKey: 'routing-key'
           content: new Buffer '{"a":"b","c":"d"}'
 
+    it 'emits message events to "?" wildcard handler', (done) ->
+      @subject.on 'message.foo.?', (type, payload) ->
+        expect(type).toBe 'foo.bar'
+        expect(payload).toEqual a: 'b', c: 'd'
+        done()
+
+      @subject._consume().then =>
+        @consumeCallback
+          fields: routingKey: 'foo.bar'
+          content: new Buffer '{"a":"b","c":"d"}'
+
+    it 'does not emit message events to non-matching "?" wildcard handler', (done) ->
+      handler = jasmine.createSpy()
+      @subject.on 'message.foo.?', handler
+
+      @subject._consume().then =>
+        @consumeCallback
+          fields: routingKey: 'foo'
+          content: new Buffer '{"a":"b","c":"d"}'
+
+        expect(handler.calls.length).toBe 0
+        done()
+
+    it 'emits message events to "*" wildcard handler', (done) ->
+      @subject.on 'message.foo.*', (type, payload) ->
+        expect(type).toBe 'foo.bar.baz'
+        expect(payload).toEqual a: 'b', c: 'd'
+        done()
+
+      @subject._consume().then =>
+        @consumeCallback
+          fields: routingKey: 'foo.bar.baz'
+          content: new Buffer '{"a":"b","c":"d"}'
+
+    it 'does not emit message events to non-matching "*" wildcard handler', (done) ->
+      handler = jasmine.createSpy()
+      @subject.on 'message.*.spam', handler
+
+      @subject._consume().then =>
+        @consumeCallback
+          fields: routingKey: 'foo.bar.baz'
+          content: new Buffer '{"a":"b","c":"d"}'
+
+        expect(handler.calls.length).toBe 0
+        done()
+
+    it 'can still emit wildcard messages after handler is removed', (done) ->
+      pattern = 'message.foo.?'
+      handler1 = jasmine.createSpy()
+      handler2 = jasmine.createSpy()
+
+      @subject.on pattern, handler1
+      @subject.on pattern, handler2
+      @subject.removeListener pattern, handler1
+
+      @subject._consume().then =>
+        @consumeCallback
+          fields: routingKey: 'foo.bar'
+          content: new Buffer '{"a":"b","c":"d"}'
+
+        expect(handler1.calls.length).toBe 0
+        expect(handler2.calls.length).toBe 1
+        done()
+
+    it 'removes regexes when there are no wildcard handlers', (done) ->
+      pattern = 'message.foo.?'
+      handler1 = ->
+      handler2 = ->
+
+      @subject.on pattern, handler1
+      @subject.on pattern, handler2
+
+      expect(@subject._wildcardListeners[pattern]).toBeDefined()
+
+      @subject.removeListener pattern, handler1
+      @subject.removeListener pattern, handler2
+
+      expect(@subject._wildcardListeners[pattern]).toBeUndefined()
+      done()
+
     it 'can consume after a pending cancel', (done) ->
       @subject._consume()
       @subject._cancelConsume()

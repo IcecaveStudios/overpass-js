@@ -27,6 +27,7 @@
     "amqplib": "^0.3",
     "bluebird": "^2.3",
     "enum": "^0.2",
+    "escape-string-regexp": "^1.0.2",
     "requireindex": "^1.1.0",
     "winston": "^0.8"
   },
