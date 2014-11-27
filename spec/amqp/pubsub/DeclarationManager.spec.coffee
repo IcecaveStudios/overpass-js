@@ -59,7 +59,11 @@ describe 'amqp.pubsub.DeclarationManager', ->
     it 'delares the queue correctly', (done) ->
       @subject.queue().then (actual) =>
         expect(actual).toBe 'queue-name'
-        expect(@channel.assertQueue).toHaveBeenCalledWith null, exclusive: true, autoDelete: true, durable: false
+        expect(@channel.assertQueue).toHaveBeenCalledWith null,
+            exclusive: true
+            autoDelete: true
+            durable: false
+            noAck: true
         done()
 
     it 'only declares the queue once', (done) ->

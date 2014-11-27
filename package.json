@@ -1,9 +1,12 @@
 {
   "name": "overpass",
   "description": "A basic pub/sub and RPC system.",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "homepage": "https://github.com/IcecaveStudios/overpass-js",
   "author": "Erin Millard",
+  "contributors": [
+      "James Harris"
+  ],
   "keywords": [],
   "repository": {
     "type": "git",
