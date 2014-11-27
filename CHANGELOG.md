@@ -1,5 +1,9 @@
 # Overpass for Node.js Changelog
 
+### 0.2.2 (2014-11-27)
+
+* **[FIXED]** `AmqpSubscriber` now uses the `no-ack` flag when consuming
+
 ### 0.2.1 (2014-11-27)
 
 * **[FIXED]** `AmqpSubscriber` now uses the `no-ack` flag when creating queues
