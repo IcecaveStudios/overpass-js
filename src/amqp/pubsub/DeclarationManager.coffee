@@ -22,4 +22,5 @@ module.exports = class DeclarationManager
         exclusive: true
         autoDelete: true
         durable: false
+        noAck: true
       .then (response) -> response.queue
