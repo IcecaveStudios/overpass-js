@@ -134,7 +134,7 @@ describe 'amqp.pubsub.AmqpSubscriber', ->
       @subject.subscribe 'topic-b'
 
       @subject._consumer.then =>
-        expect(@channel.consume).toHaveBeenCalledWith 'queue-name', jasmine.any(Function)
+        expect(@channel.consume).toHaveBeenCalledWith 'queue-name', jasmine.any(Function), noAck: true
         expect(@channel.consume.calls.length).toBe 1
         expect(@subject._consumerTag).toBe 'consumer-tag'
         expect(@subject._consumerState).toBe 'consuming'
@@ -144,7 +144,7 @@ describe 'amqp.pubsub.AmqpSubscriber', ->
       @subject.subscribe('topic-a').then => @subject.subscribe 'topic-b'
 
       @subject._consumer.then =>
-        expect(@channel.consume).toHaveBeenCalledWith 'queue-name', jasmine.any(Function)
+        expect(@channel.consume).toHaveBeenCalledWith 'queue-name', jasmine.any(Function), noAck: true
         expect(@channel.consume.calls.length).toBe 1
         expect(@subject._consumerTag).toBe 'consumer-tag'
         expect(@subject._consumerState).toBe 'consuming'
@@ -255,7 +255,7 @@ describe 'amqp.pubsub.AmqpSubscriber', ->
       @subject.unsubscribe 'topic-a'
 
       @subject.unsubscribe('topic-b').then =>
-        expect(@channel.consume).toHaveBeenCalledWith 'queue-name', jasmine.any(Function)
+        expect(@channel.consume).toHaveBeenCalledWith 'queue-name', jasmine.any(Function), noAck: true
         expect(@channel.consume.calls.length).toBe 1
         expect(@channel.cancel).toHaveBeenCalledWith 'consumer-tag'
         expect(@channel.cancel.calls.length).toBe 1
@@ -268,7 +268,7 @@ describe 'amqp.pubsub.AmqpSubscriber', ->
       .then => @subject.unsubscribe('topic-a')
       .then => @subject.unsubscribe('topic-b')
       .then =>
-        expect(@channel.consume).toHaveBeenCalledWith 'queue-name', jasmine.any(Function)
+        expect(@channel.consume).toHaveBeenCalledWith 'queue-name', jasmine.any(Function), noAck: true
         expect(@channel.consume.calls.length).toBe 1
         expect(@channel.cancel).toHaveBeenCalledWith 'consumer-tag'
         expect(@channel.cancel.calls.length).toBe 1
@@ -392,7 +392,7 @@ describe 'amqp.pubsub.AmqpSubscriber', ->
       @subject._cancelConsume()
 
       @subject._consume().then =>
-        expect(@channel.consume).toHaveBeenCalledWith 'queue-name', jasmine.any(Function)
+        expect(@channel.consume).toHaveBeenCalledWith 'queue-name', jasmine.any(Function), noAck: true
         expect(@channel.consume.calls.length).toBe 2
         expect(@channel.cancel).toHaveBeenCalledWith 'consumer-tag'
         expect(@channel.cancel.calls.length).toBe 1

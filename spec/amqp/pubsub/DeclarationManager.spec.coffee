@@ -63,7 +63,6 @@ describe 'amqp.pubsub.DeclarationManager', ->
             exclusive: true
             autoDelete: true
             durable: false
-            noAck: true
         done()
 
     it 'only declares the queue once', (done) ->
