@@ -311,7 +311,7 @@ describe "amqp.pubsub.AmqpSubscriber", ->
                     fields: routingKey: "routing-key"
                     content: new Buffer '{"a":"b","c":"d"}'
 
-        it "emits message events to "?" wildcard handler", (done) ->
+        it 'emits message events to "?" wildcard handler', (done) ->
             @subject.on "message.foo.?", (type, payload) ->
                 expect(type).toBe "foo.bar"
                 expect(payload).toEqual a: "b", c: "d"
@@ -322,7 +322,7 @@ describe "amqp.pubsub.AmqpSubscriber", ->
                     fields: routingKey: "foo.bar"
                     content: new Buffer '{"a":"b","c":"d"}'
 
-        it "does not emit message events to non-matching "?" wildcard handler", (done) ->
+        it 'does not emit message events to non-matching "?" wildcard handler', (done) ->
             handler = jasmine.createSpy()
             @subject.on "message.foo.?", handler
 
@@ -334,7 +334,7 @@ describe "amqp.pubsub.AmqpSubscriber", ->
                 expect(handler.calls.length).toBe 0
                 done()
 
-        it "emits message events to "*" wildcard handler", (done) ->
+        it 'emits message events to "*" wildcard handler', (done) ->
             @subject.on "message.foo.*", (type, payload) ->
                 expect(type).toBe "foo.bar.baz"
                 expect(payload).toEqual a: "b", c: "d"
@@ -345,7 +345,7 @@ describe "amqp.pubsub.AmqpSubscriber", ->
                     fields: routingKey: "foo.bar.baz"
                     content: new Buffer '{"a":"b","c":"d"}'
 
-        it "does not emit message events to non-matching "*" wildcard handler", (done) ->
+        it 'does not emit message events to non-matching "*" wildcard handler', (done) ->
             handler = jasmine.createSpy()
             @subject.on "message.*.spam", handler
 

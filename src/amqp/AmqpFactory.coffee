@@ -1,24 +1,22 @@
+AmqpPublisher = require "./pubsub/AmqpPublisher"
+AmqpRpcClient = require "./rpc/AmqpRpcClient"
+AmqpSubscriberDriver = require "./pubsub/AmqpSubscriberDriver"
+Subscriber = require "../pubsub/Subscriber"
+
 module.exports = class AmqpFactory
 
-    constructor: (
-        @connection
-        @rpcTimeout = 3
-        @logger = require "winston"
-    ) ->
+    constructor: (@connection, @logger = require "winston") ->
 
     createPublisher: ->
-        @connection
-            .createChannel()
-            .then (channel) => new Publisher channel, @logger
+        @connection.createChannel()
+        .then (channel) => new AmqpPublisher channel, null, null, @logger
 
     createSubscriber: ->
-        @connection
-            .createChannel()
-            .then (channel) =>
-                driver = new AmqpSubscriberDriver channel
-                new Subscriber driver, @logger
+        @connection.createChannel()
+        .then (channel) =>
+            new Subscriber new AmqpSubscriberDriver(channel), @logger
 
-    createRpcClient: ->
-        @connection
-            .createChannel()
-            .then (channel) => new AmqpRpcClient channel, @rpcTimeout, null, null, @logger
+    createRpcClient: (timeout = null) ->
+        @connection.createChannel()
+        .then (channel) =>
+            new AmqpRpcClient channel, timeout, null, null, @logger

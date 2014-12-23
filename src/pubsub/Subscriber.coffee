@@ -1,4 +1,4 @@
-{EventEmitter} = require "event"
+{EventEmitter} = require "events"
 bluebird = require "bluebird"
 regexEscape = require "escape-string-regexp"
 

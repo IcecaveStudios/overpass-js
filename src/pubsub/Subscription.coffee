@@ -1,4 +1,4 @@
-{EventEmitter} = require "event"
+{EventEmitter} = require "events"
 bluebird = require "bluebird"
 
 module.exports = class Subscription extends EventEmitter
