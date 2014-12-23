@@ -1,177 +1,182 @@
-bluebird = require 'bluebird'
-requireHelper = require '../../require-helper'
-AmqpSubscriberDriver = requireHelper 'amqp/pubsub/AmqpSubscriberDriver'
-DeclarationManager = requireHelper 'amqp/pubsub/DeclarationManager'
-JsonSerialization = requireHelper 'serialization/JsonSerialization'
+bluebird = require "bluebird"
+requireHelper = require "../../require-helper"
+AmqpSubscriberDriver = requireHelper "amqp/pubsub/AmqpSubscriberDriver"
+DeclarationManager = requireHelper "amqp/pubsub/DeclarationManager"
+JsonSerialization = requireHelper "serialization/JsonSerialization"
 
-describe 'amqp.pubsub.AmqpSubscriberDriver', ->
-  beforeEach ->
-    @channel = jasmine.createSpyObj 'channel', ['bindQueue', 'unbindQueue', 'consume', 'cancel']
-    @declarationManager = jasmine.createSpyObj 'declarationManager', ['queue', 'exchange']
-    @serialization = new JsonSerialization()
-    @subject = new AmqpSubscriberDriver @channel, @declarationManager, @serialization
+describe "amqp.pubsub.AmqpSubscriberDriver", ->
 
-    @error = new Error 'Error message.'
-    @consumeCallback = null
+    beforeEach ->
+        @channel = jasmine.createSpyObj "channel", ["bindQueue", "unbindQueue", "consume", "cancel"]
+        @declarationManager = jasmine.createSpyObj "declarationManager", ["queue", "exchange"]
+        @serialization = new JsonSerialization()
+        @subject = new AmqpSubscriberDriver @channel, @declarationManager, @serialization
 
-    @declarationManager.queue.andCallFake -> bluebird.resolve 'queue-name'
-    @declarationManager.exchange.andCallFake -> bluebird.resolve 'exchange-name'
-    @channel.consume.andCallFake (queue, callback) =>
-      @consumeCallback = callback
-      bluebird.resolve consumerTag: 'consumer-tag'
-    @channel.cancel.andCallFake -> bluebird.resolve()
+        @error = new Error "Error message."
+        @consumeCallback = null
 
-  it 'stores the supplied dependencies', ->
-    expect(@subject.channel).toBe @channel
-    expect(@subject.declarationManager).toBe @declarationManager
-    expect(@subject.serialization).toBe @serialization
+        @declarationManager.queue.andCallFake -> bluebird.resolve "queue-name"
+        @declarationManager.exchange.andCallFake -> bluebird.resolve "exchange-name"
+        @channel.consume.andCallFake (queue, callback) =>
+            @consumeCallback = callback
+            bluebird.resolve consumerTag: "consumer-tag"
+        @channel.cancel.andCallFake -> bluebird.resolve()
 
-  it 'creates sensible default dependencies', ->
-    @subject = new AmqpSubscriberDriver @channel
+    it "stores the supplied dependencies", ->
+        expect(@subject.channel).toBe @channel
+        expect(@subject.declarationManager).toBe @declarationManager
+        expect(@subject.serialization).toBe @serialization
 
-    expect(@subject.declarationManager).toEqual new DeclarationManager @channel
-    expect(@subject.serialization).toEqual new JsonSerialization
+    it "creates sensible default dependencies", ->
+        @subject = new AmqpSubscriberDriver @channel
 
-  describe 'subscribe()', ->
-    it 'binds correctly', (done) ->
-      bluebird.join \
-        @subject.subscribe('topic.*.a'),
-        @subject.subscribe('topic.?.b'),
-        =>
-          expect(@channel.bindQueue).toHaveBeenCalledWith 'queue-name', 'exchange-name', 'topic.#.a'
-          expect(@channel.bindQueue).toHaveBeenCalledWith 'queue-name', 'exchange-name', 'topic.*.b'
-          done()
+        expect(@subject.declarationManager).toEqual new DeclarationManager @channel
+        expect(@subject.serialization).toEqual new JsonSerialization
 
-    it 'propagates queue creation errors', (done) ->
-      @declarationManager.queue.andCallFake => bluebird.reject @error
+    describe "subscribe()", ->
 
-      @subject.subscribe('topic-name').catch (actual) =>
-        expect(actual).toBe @error
-        expect(@channel.bindQueue.calls.length).toBe 0
-        done()
+        it "binds correctly", (done) ->
+            bluebird.join \
+                @subject.subscribe("topic.*.a"),
+                @subject.subscribe("topic.?.b"),
+                =>
+                    expect(@channel.bindQueue).toHaveBeenCalledWith "queue-name", "exchange-name", "topic.#.a"
+                    expect(@channel.bindQueue).toHaveBeenCalledWith "queue-name", "exchange-name", "topic.*.b"
+                    done()
 
-    it 'propagates exchange creation errors', (done) ->
-      @declarationManager.exchange.andCallFake => bluebird.reject @error
+        it "propagates queue creation errors", (done) ->
+            @declarationManager.queue.andCallFake => bluebird.reject @error
 
-      @subject.subscribe('topic-name').catch (actual) =>
-        expect(actual).toBe @error
-        expect(@channel.bindQueue.calls.length).toBe 0
-        done()
+            @subject.subscribe("topic-name").catch (actual) =>
+                expect(actual).toBe @error
+                expect(@channel.bindQueue.calls.length).toBe 0
+                done()
 
-    it 'propagates binding errors', (done) ->
-      @channel.bindQueue.andCallFake => bluebird.reject @error
+        it "propagates exchange creation errors", (done) ->
+            @declarationManager.exchange.andCallFake => bluebird.reject @error
 
-      @subject.subscribe('topic-name').catch (actual) =>
-        expect(actual).toBe @error
-        done()
+            @subject.subscribe("topic-name").catch (actual) =>
+                expect(actual).toBe @error
+                expect(@channel.bindQueue.calls.length).toBe 0
+                done()
 
-    it 'starts consuming when subscriptions are added concurrently', (done) ->
-      @subject.subscribe 'topic-a'
-      @subject.subscribe 'topic-b'
+        it "propagates binding errors", (done) ->
+            @channel.bindQueue.andCallFake => bluebird.reject @error
 
-      @subject._consumer.then =>
-        expect(@channel.consume).toHaveBeenCalledWith 'queue-name', jasmine.any(Function), noAck: true
-        expect(@channel.consume.calls.length).toBe 1
-        expect(@subject._consumerTag).toBe 'consumer-tag'
-        expect(@subject._consumerState).toBe 'consuming'
-        done()
+            @subject.subscribe("topic-name").catch (actual) =>
+                expect(actual).toBe @error
+                done()
 
-    it 'starts consuming when subscriptions are added sequentially', (done) ->
-      @subject.subscribe('topic-a').then => @subject.subscribe 'topic-b'
+        it "starts consuming when subscriptions are added concurrently", (done) ->
+            @subject.subscribe "topic-a"
+            @subject.subscribe "topic-b"
 
-      @subject._consumer.then =>
-        expect(@channel.consume).toHaveBeenCalledWith 'queue-name', jasmine.any(Function), noAck: true
-        expect(@channel.consume.calls.length).toBe 1
-        expect(@subject._consumerTag).toBe 'consumer-tag'
-        expect(@subject._consumerState).toBe 'consuming'
-        done()
+            @subject._consumer.then =>
+                expect(@channel.consume).toHaveBeenCalledWith "queue-name", jasmine.any(Function), noAck: true
+                expect(@channel.consume.calls.length).toBe 1
+                expect(@subject._consumerTag).toBe "consumer-tag"
+                expect(@subject._consumerState).toBe "consuming"
+                done()
 
-  describe 'unsubscribe()', ->
-    it 'unbinds correctly', (done) ->
-      bluebird.join \
-        @subject.subscribe('topic.*.a'),
-        @subject.unsubscribe('topic.*.a'),
-        @subject.subscribe('topic.?.b'),
-        @subject.unsubscribe('topic.?.b'),
-        =>
-          expect(@channel.unbindQueue).toHaveBeenCalledWith 'queue-name', 'exchange-name', 'topic.#.a'
-          expect(@channel.unbindQueue).toHaveBeenCalledWith 'queue-name', 'exchange-name', 'topic.*.b'
-          done()
+        it "starts consuming when subscriptions are added sequentially", (done) ->
+            @subject.subscribe("topic-a").then => @subject.subscribe "topic-b"
 
-    it 'propagates unbinding errors', (done) ->
-      @channel.unbindQueue.andCallFake => bluebird.reject @error
+            @subject._consumer.then =>
+                expect(@channel.consume).toHaveBeenCalledWith "queue-name", jasmine.any(Function), noAck: true
+                expect(@channel.consume.calls.length).toBe 1
+                expect(@subject._consumerTag).toBe "consumer-tag"
+                expect(@subject._consumerState).toBe "consuming"
+                done()
 
-      @subject.subscribe('topic-name')
-      .then => @subject.unsubscribe('topic-name')
-      .catch (actual) =>
-        expect(actual).toBe @error
-        expect(@channel.unbindQueue.calls.length).toBe 1
-        done()
+    describe "unsubscribe()", ->
 
-    it 'stops consuming when all subscriptions are removed concurrently', (done) ->
-      @subject.subscribe 'topic-a'
-      @subject.subscribe 'topic-b'
-      @subject.unsubscribe 'topic-a'
+        it "unbinds correctly", (done) ->
+            bluebird.join \
+                @subject.subscribe("topic.*.a"),
+                @subject.unsubscribe("topic.*.a"),
+                @subject.subscribe("topic.?.b"),
+                @subject.unsubscribe("topic.?.b"),
+                =>
+                    expect(@channel.unbindQueue).toHaveBeenCalledWith "queue-name", "exchange-name", "topic.#.a"
+                    expect(@channel.unbindQueue).toHaveBeenCalledWith "queue-name", "exchange-name", "topic.*.b"
+                    done()
 
-      @subject.unsubscribe('topic-b').then =>
-        expect(@channel.consume).toHaveBeenCalledWith 'queue-name', jasmine.any(Function), noAck: true
-        expect(@channel.consume.calls.length).toBe 1
-        expect(@channel.cancel).toHaveBeenCalledWith 'consumer-tag'
-        expect(@channel.cancel.calls.length).toBe 1
-        expect(@subject._consumerState).toBe 'detached'
-        done()
+        it "propagates unbinding errors", (done) ->
+            @channel.unbindQueue.andCallFake => bluebird.reject @error
 
-    it 'stops consuming when all subscriptions are removed sequentially', (done) ->
-      @subject.subscribe('topic-a')
-      .then => @subject.subscribe('topic-b')
-      .then => @subject.unsubscribe('topic-a')
-      .then => @subject.unsubscribe('topic-b')
-      .then =>
-        expect(@channel.consume).toHaveBeenCalledWith 'queue-name', jasmine.any(Function), noAck: true
-        expect(@channel.consume.calls.length).toBe 1
-        expect(@channel.cancel).toHaveBeenCalledWith 'consumer-tag'
-        expect(@channel.cancel.calls.length).toBe 1
-        expect(@subject._consumerState).toBe 'detached'
-        done()
+            @subject.subscribe("topic-name")
+            .then => @subject.unsubscribe("topic-name")
+            .catch (actual) =>
+                expect(actual).toBe @error
+                expect(@channel.unbindQueue.calls.length).toBe 1
+                done()
 
-  describe '_consume()', ->
-    it 'emits generic message events', (done) ->
-      @subject.on 'message', (type, payload) ->
-        expect(type).toBe 'routing-key'
-        expect(payload).toEqual a: 'b', c: 'd'
-        done()
+        it "stops consuming when all subscriptions are removed concurrently", (done) ->
+            @subject.subscribe "topic-a"
+            @subject.subscribe "topic-b"
+            @subject.unsubscribe "topic-a"
 
-      @subject._consume().then =>
-        @consumeCallback
-          fields: routingKey: 'routing-key'
-          content: new Buffer '{"a":"b","c":"d"}'
+            @subject.unsubscribe("topic-b").then =>
+                expect(@channel.consume).toHaveBeenCalledWith "queue-name", jasmine.any(Function), noAck: true
+                expect(@channel.consume.calls.length).toBe 1
+                expect(@channel.cancel).toHaveBeenCalledWith "consumer-tag"
+                expect(@channel.cancel.calls.length).toBe 1
+                expect(@subject._consumerState).toBe "detached"
+                done()
 
-    it 'can consume after a pending cancel', (done) ->
-      @subject._consume()
-      @subject._cancelConsume()
+        it "stops consuming when all subscriptions are removed sequentially", (done) ->
+            @subject.subscribe("topic-a")
+            .then => @subject.subscribe("topic-b")
+            .then => @subject.unsubscribe("topic-a")
+            .then => @subject.unsubscribe("topic-b")
+            .then =>
+                expect(@channel.consume).toHaveBeenCalledWith "queue-name", jasmine.any(Function), noAck: true
+                expect(@channel.consume.calls.length).toBe 1
+                expect(@channel.cancel).toHaveBeenCalledWith "consumer-tag"
+                expect(@channel.cancel.calls.length).toBe 1
+                expect(@subject._consumerState).toBe "detached"
+                done()
 
-      @subject._consume().then =>
-        expect(@channel.consume).toHaveBeenCalledWith 'queue-name', jasmine.any(Function), noAck: true
-        expect(@channel.consume.calls.length).toBe 2
-        expect(@channel.cancel).toHaveBeenCalledWith 'consumer-tag'
-        expect(@channel.cancel.calls.length).toBe 1
-        expect(@subject._consumerState).toBe 'consuming'
-        done()
+    describe "_consume()", ->
 
-  describe '_cancelConsume()', ->
-    it 'correctly handles cancellation when already detatched', (done) ->
-      @subject._cancelConsume().then =>
-        expect(@channel.consume.calls.length).toBe 0
-        expect(@channel.cancel.calls.length).toBe 0
-        expect(@subject._consumerState).toBe 'detached'
-        done()
+        it "emits generic message events", (done) ->
+            @subject.on "message", (type, payload) ->
+                expect(type).toBe "routing-key"
+                expect(payload).toEqual a: "b", c: "d"
+                done()
 
-    it 'correctly handles a failure', (done) ->
-      @channel.cancel.andCallFake => bluebird.reject @error
+            @subject._consume().then =>
+                @consumeCallback
+                    fields: routingKey: "routing-key"
+                    content: new Buffer '{"a":"b","c":"d"}'
 
-      @subject._consume()
-      .then => @subject._cancelConsume()
-      .catch (actual) =>
-        expect(actual).toBe @error
-        expect(@subject._consumerState).toBe 'consuming'
-        done()
+        it "can consume after a pending cancel", (done) ->
+            @subject._consume()
+            @subject._cancelConsume()
+
+            @subject._consume().then =>
+                expect(@channel.consume).toHaveBeenCalledWith "queue-name", jasmine.any(Function), noAck: true
+                expect(@channel.consume.calls.length).toBe 2
+                expect(@channel.cancel).toHaveBeenCalledWith "consumer-tag"
+                expect(@channel.cancel.calls.length).toBe 1
+                expect(@subject._consumerState).toBe "consuming"
+                done()
+
+    describe "_cancelConsume()", ->
+
+        it "correctly handles cancellation when already detatched", (done) ->
+            @subject._cancelConsume().then =>
+                expect(@channel.consume.calls.length).toBe 0
+                expect(@channel.cancel.calls.length).toBe 0
+                expect(@subject._consumerState).toBe "detached"
+                done()
+
+        it "correctly handles a failure", (done) ->
+            @channel.cancel.andCallFake => bluebird.reject @error
+
+            @subject._consume()
+            .then => @subject._cancelConsume()
+            .catch (actual) =>
+                expect(actual).toBe @error
+                expect(@subject._consumerState).toBe "consuming"
+                done()

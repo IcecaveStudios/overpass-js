@@ -1,14 +1,15 @@
-requireHelper = require '../../require-helper'
-InvalidArgumentsError = requireHelper 'rpc/error/InvalidArgumentsError'
-ResponseCode = requireHelper 'rpc/message/ResponseCode'
+requireHelper = require "../../require-helper"
+InvalidArgumentsError = requireHelper "rpc/error/InvalidArgumentsError"
+ResponseCode = requireHelper "rpc/message/ResponseCode"
 
-describe 'rpc.error.InvalidArgumentsError', ->
-  beforeEach ->
-    @message = 'Error message.'
-    @subject = new InvalidArgumentsError @message
+describe "rpc.error.InvalidArgumentsError", ->
 
-  it 'stores the error message', ->
-    expect(@subject.message).toBe @message
+    beforeEach ->
+        @message = "Error message."
+        @subject = new InvalidArgumentsError @message
 
-  it 'returns the correct response code', ->
-    expect(@subject.responseCode).toBe ResponseCode.INVALID_ARGUMENTS
+    it "stores the error message", ->
+        expect(@subject.message).toBe @message
+
+    it "returns the correct response code", ->
+        expect(@subject.responseCode).toBe ResponseCode.INVALID_ARGUMENTS
