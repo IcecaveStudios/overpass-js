@@ -75,7 +75,6 @@ describe "amqp.pubsub.AmqpSubscriberDriver", ->
                 expect(@channel.consume).toHaveBeenCalledWith "queue-name", jasmine.any(Function), noAck: true
                 expect(@channel.consume.calls.length).toBe 1
                 expect(@subject._consumerTag).toBe "consumer-tag"
-                expect(@subject._consumerState).toBe "consuming"
                 done()
 
         it "starts consuming when subscriptions are added sequentially", (done) ->
@@ -85,7 +84,6 @@ describe "amqp.pubsub.AmqpSubscriberDriver", ->
                 expect(@channel.consume).toHaveBeenCalledWith "queue-name", jasmine.any(Function), noAck: true
                 expect(@channel.consume.calls.length).toBe 1
                 expect(@subject._consumerTag).toBe "consumer-tag"
-                expect(@subject._consumerState).toBe "consuming"
                 done()
 
     describe "unsubscribe()", ->
@@ -121,7 +119,7 @@ describe "amqp.pubsub.AmqpSubscriberDriver", ->
                 expect(@channel.consume.calls.length).toBe 1
                 expect(@channel.cancel).toHaveBeenCalledWith "consumer-tag"
                 expect(@channel.cancel.calls.length).toBe 1
-                expect(@subject._consumerState).toBe "detached"
+                expect(@subject._consumerTag).toBeNull()
                 done()
 
         it "stops consuming when all subscriptions are removed sequentially", (done) ->
@@ -134,7 +132,7 @@ describe "amqp.pubsub.AmqpSubscriberDriver", ->
                 expect(@channel.consume.calls.length).toBe 1
                 expect(@channel.cancel).toHaveBeenCalledWith "consumer-tag"
                 expect(@channel.cancel.calls.length).toBe 1
-                expect(@subject._consumerState).toBe "detached"
+                expect(@subject._consumerTag).toBeNull()
                 done()
 
     describe "_consume()", ->
@@ -159,7 +157,7 @@ describe "amqp.pubsub.AmqpSubscriberDriver", ->
                 expect(@channel.consume.calls.length).toBe 2
                 expect(@channel.cancel).toHaveBeenCalledWith "consumer-tag"
                 expect(@channel.cancel.calls.length).toBe 1
-                expect(@subject._consumerState).toBe "consuming"
+                expect(@subject._consumerTag).toBe "consumer-tag"
                 done()
 
     describe "_cancelConsume()", ->
@@ -168,7 +166,7 @@ describe "amqp.pubsub.AmqpSubscriberDriver", ->
             @subject._cancelConsume().then =>
                 expect(@channel.consume.calls.length).toBe 0
                 expect(@channel.cancel.calls.length).toBe 0
-                expect(@subject._consumerState).toBe "detached"
+                expect(@subject._consumerTag).toBeNull()
                 done()
 
         it "correctly handles a failure", (done) ->
@@ -178,5 +176,5 @@ describe "amqp.pubsub.AmqpSubscriberDriver", ->
             .then => @subject._cancelConsume()
             .catch (actual) =>
                 expect(actual).toBe @error
-                expect(@subject._consumerState).toBe "consuming"
+                expect(@subject._consumerTag).toBe "consumer-tag"
                 done()

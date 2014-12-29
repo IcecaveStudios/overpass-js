@@ -12,7 +12,6 @@ module.exports = class AmqpSubscriberDriver extends EventEmitter
     ) ->
         @_count = 0
         @_consumer = bluebird.resolve()
-        @_consumerState = "detached"
         @_consumerTag = null
 
     subscribe: (topic) ->
@@ -49,52 +48,34 @@ module.exports = class AmqpSubscriberDriver extends EventEmitter
     _normalizeTopic: (topic) ->
         topic.replace(/\*/g, "#").replace /\?/g, "*"
 
-    _consume: ->
-        switch @_consumerState
-            when "consuming"
-                @_consumer
-            when "attaching"
-                @_consumer
-            when "detached"
-                @_consumerState = "attaching"
-                @_consumer = @_doConsume()
-            when "cancelling"
-                @_consumerState = "attaching"
-                @_consumer = @_consumer.then => @_doConsume()
+    _consume: -> @_consumer = @_consumer.then => @_doConsume()
 
-    _cancelConsume: ->
-        switch @_consumerState
-            when "consuming"
-                @_consumerState = "cancelling"
-                @_consumer = @_doCancelConsume()
-            when "attaching"
-                @_consumerState = "cancelling"
-                @_consumer = @_consumer.then => @_doCancelConsume()
-            when "detached"
-                @_consumer
-            when "cancelling"
-                @_consumer
+    _cancelConsume: -> @_consumer = @_consumer.then => @_doCancelConsume()
 
     _doConsume: ->
+        return bluebird.resolve() if @_consumerTag?
+
         consumer = @declarationManager.queue().then (queue) =>
-                @channel.consume queue, @_message, noAck: true
+            @channel.consume queue, @_message, noAck: true
 
         consumer
             .then (response) =>
-                @_consumerState = "consuming"
                 @_consumerTag = response.consumerTag
             .catch (error) =>
-                @_consumerState = "detached"
+                @_consumerTag = null
                 throw error
 
     _doCancelConsume: ->
+        return bluebird.resolve() unless @_consumerTag?
+
+        consumerTag = @_consumerTag
+
         cancel = @channel.cancel @_consumerTag
         cancel
             .then =>
-                @_consumerState = "detached"
                 @_consumerTag = null
             .catch (error) =>
-                @_consumerState = "consuming"
+                @_consumerTag = consumerTag
                 throw error
 
     _message: (message) =>
