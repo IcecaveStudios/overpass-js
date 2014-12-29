@@ -11,7 +11,7 @@ module.exports = class AmqpSubscriberDriver extends EventEmitter
         @serialization = new JsonSerialization()
     ) ->
         @_count = 0
-        @_consumer = null
+        @_consumer = bluebird.resolve()
         @_consumerState = "detached"
         @_consumerTag = null
 
@@ -52,7 +52,7 @@ module.exports = class AmqpSubscriberDriver extends EventEmitter
     _consume: ->
         switch @_consumerState
             when "consuming"
-                bluebird.resolve()
+                @_consumer
             when "attaching"
                 @_consumer
             when "detached"
@@ -71,7 +71,7 @@ module.exports = class AmqpSubscriberDriver extends EventEmitter
                 @_consumerState = "cancelling"
                 @_consumer = @_consumer.then => @_doCancelConsume()
             when "detached"
-                bluebird.resolve()
+                @_consumer
             when "cancelling"
                 @_consumer
 

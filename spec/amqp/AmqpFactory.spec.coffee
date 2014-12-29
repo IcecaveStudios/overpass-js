@@ -61,3 +61,34 @@ describe "amqp.AmqpFactory", ->
                 .then (result) =>
                     expect(result.timeout).toBe 111
                     done()
+
+    describe "when channel creation fails", ->
+
+        beforeEach ->
+            @error = new Error "You done goofed."
+            @connection.createChannel.andReturn bluebird.reject @error
+
+        describe "createPublisher()", ->
+
+            it "propagates the error", (done) ->
+                @subject.createPublisher()
+                .catch (error) =>
+                    expect(error).toBe @error
+                    done()
+
+        describe "createSubscriber()", ->
+
+            it "propagates the error", (done) ->
+                @subject.createSubscriber()
+                .catch (error) =>
+                    expect(error).toBe @error
+                    done()
+
+
+        describe "createRpcClient()", ->
+
+            it "propagates the error", (done) ->
+                @subject.createRpcClient()
+                .catch (error) =>
+                    expect(error).toBe @error
+                    done()

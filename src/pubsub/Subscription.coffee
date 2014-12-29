@@ -5,12 +5,12 @@ module.exports = class Subscription extends EventEmitter
 
     constructor: (@subscriber, @topic) ->
         @_state = "unsubscribed"
-        @_promise = null
+        @_promise = bluebird.resolve()
 
     enable: ->
         switch @_state
             when "subscribed"
-                bluebird.resolve()
+                @_promise
             when "subscribing"
                 @_promise
             when "unsubscribed"
@@ -29,7 +29,7 @@ module.exports = class Subscription extends EventEmitter
                 @_state = "unsubscribing"
                 @_promise = @_promise.then => @_unsubscribe()
             when "unsubscribed"
-                bluebird.resolve()
+                @_promise
             when "unsubscribing"
                 @_promise
 

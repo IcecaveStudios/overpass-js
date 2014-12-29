@@ -4,6 +4,8 @@ regexEscape = require "escape-string-regexp"
 DeclarationManager = require "./DeclarationManager"
 JsonSerialization = require "../../serialization/JsonSerialization"
 
+# DEPRECATED: Use AmqpFactory/AmqpSubscriberDriver/Subscriber/Subscription
+
 module.exports = class AmqpSubscriber extends EventEmitter
 
     constructor: (

@@ -1,6 +1,7 @@
 {EventEmitter} = require "events"
 bluebird = require "bluebird"
 regexEscape = require "escape-string-regexp"
+Subscription = require "./Subscription"
 
 class Topic
 
@@ -26,38 +27,33 @@ module.exports = class Subscriber extends EventEmitter
         topic = @_topic topic
         topic.subscriptions++
 
-        if topic.subscriptions > 1
-            return topic.promise
+        return topic.promise if topic.subscriptions > 1
 
-        switch topic.state
-            when "subscribed"  then topic.promise
-            when "subscribing" then topic.promise
+        state = topic.state
+        topic.state = "subscribing"
+
+        switch state
             when "unsubscribed"
-                topic.state = "subscribing"
                 topic.promise = @_subscribe topic
             when "unsubscribing"
-                topic.state = "subscribing"
                 topic.promise = topic.promise.then => @_subscribe topic
 
     unsubscribe: (topic) ->
         topic = @_topic topic
 
-        if topic.subscriptions is 0
-            return topic.promise
+        return topic.promise if topic.subscriptions is 0
 
         topic.subscriptions--
 
-        if topic.subscriptions > 0
-            return topic.promise
+        return topic.promise if topic.subscriptions > 0
 
-        switch topic.state
-            when "unsubscribed"  then topic.promise
-            when "unsubscribing" then topic.promise
+        state = topic.state
+        topic.state = "unsubscribing"
+
+        switch state
             when "subscribed"
-                topic.state = "unsubscribing"
                 topic.promise = @_unsubscribe topic
             when "subscribing"
-                topic.state = "unsubscribing"
                 topic.promise = topic.promise.then => @_unsubscribe topic
 
     _topic: (name) -> @_topics[name] ?= new Topic name
@@ -68,22 +64,22 @@ module.exports = class Subscriber extends EventEmitter
         .then => topic.state = "subscribed"
         .tap => @logger.debug 'Subscribed to topic "{topic}"', topic: topic.name
         .catch (error) =>
-            @topic.state = "unsubscribed"
+            topic.state = "unsubscribed"
             throw error
 
     _unsubscribe: (topic) ->
         @driver
         .unsubscribe topic.name
         .then => topic.state = "unsubscribed"
-        .tap => @logger.debug 'Unsubscribed from topic "{topic}"', topic: topic
+        .tap => @logger.debug 'Unsubscribed from topic "{topic}"', topic: topic.name
         .catch (error) =>
-            @topic.state = "subscribed"
+            topic.state = "subscribed"
             throw error
 
     _message: (topic, payload) =>
         @logger.debug 'Received {payload} from topic "{topic}"',
             topic: topic
-            payload: payloadString
+            payload: JSON.stringify payload
 
         @emit "message", topic, payload
         @emit "message.#{topic}", topic, payload
@@ -101,19 +97,20 @@ module.exports = class Subscriber extends EventEmitter
 
         isPattern = false
         atoms = for atom in atoms
-                switch atom
-                        when "*"
-                                isPattern = true
-                                "(.+)"
-                        when "?"
-                                isPattern = true
-                                "([^.]+)"
-                        else
-                                regexEscape atom
+            switch atom
+                when "*"
+                    isPattern = true
+                    "(.+)"
+                when "?"
+                    isPattern = true
+                    "([^.]+)"
+                else
+                    regexEscape atom
 
         if isPattern
                 pattern = "^#{atoms.join regexEscape "."}$"
                 @_wildcardListeners[event] = new RegExp pattern
 
     _removeListener: (event, listener) ->
-        delete @_wildcardListeners[event] unless EventEmitter.listenerCount @, event
+        unless EventEmitter.listenerCount @, event
+            delete @_wildcardListeners[event]
