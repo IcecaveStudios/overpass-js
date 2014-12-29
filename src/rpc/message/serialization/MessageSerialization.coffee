@@ -1,29 +1,31 @@
-InvalidMessageError = require '../../error/InvalidMessageError'
-JsonSerialization = require '../../../serialization/JsonSerialization'
-Response = require '../Response'
-ResponseCode = require '../ResponseCode'
+InvalidMessageError = require "../../error/InvalidMessageError"
+JsonSerialization = require "../../../serialization/JsonSerialization"
+Response = require "../Response"
+ResponseCode = require "../ResponseCode"
 
 module.exports = class MessageSerialization
-  constructor: (@serialization = new JsonSerialization()) ->
 
-  serializeRequest: (request) ->
-    @serialization.serialize [request.name, request.arguments]
+    constructor: (@serialization = new JsonSerialization()) ->
 
-  unserializeResponse: (buffer) ->
-    try
-      payload = @serialization.unserialize buffer
-    catch e
-      throw new InvalidMessageError 'Response payload is invalid.'
+    serializeRequest: (request) ->
+        @serialization.serialize [request.name, request.args]
 
-    if payload not instanceof Array or payload.length isnt 2
-      throw new InvalidMessageError 'Response payload must be a 2-tuple.'
+    unserializeResponse: (buffer) ->
+        try
+            payload = @serialization.unserialize buffer
+        catch e
+            throw new InvalidMessageError "Response payload is invalid."
 
-    [code, value] = payload
+        if payload not instanceof Array or payload.length isnt 2
+            throw new InvalidMessageError "Response payload must be a 2-tuple."
 
-    if not code = ResponseCode.get(code)
-      throw new InvalidMessageError 'Response code is unrecognised.'
+        [code, value] = payload
 
-    if code isnt ResponseCode.SUCCESS and typeof value isnt 'string'
-      throw new InvalidMessageError 'Response error message must be a string.'
+        if not code = ResponseCode.get(code)
+            throw new InvalidMessageError "Response code is unrecognised."
 
-    new Response code, value
+        if code isnt ResponseCode.SUCCESS and typeof value isnt "string"
+            throw new InvalidMessageError \
+                "Response error message must be a string."
+
+        new Response code, value

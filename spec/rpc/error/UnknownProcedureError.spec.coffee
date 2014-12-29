@@ -1,17 +1,18 @@
-requireHelper = require '../../require-helper'
-UnknownProcedureError = requireHelper 'rpc/error/UnknownProcedureError'
-ResponseCode = requireHelper 'rpc/message/ResponseCode'
+requireHelper = require "../../require-helper"
+UnknownProcedureError = requireHelper "rpc/error/UnknownProcedureError"
+ResponseCode = requireHelper "rpc/message/ResponseCode"
 
-describe 'rpc.error.UnknownProcedureError', ->
-  beforeEach ->
-    @procedureName = 'procedureName'
-    @subject = new UnknownProcedureError @procedureName
+describe "rpc.error.UnknownProcedureError", ->
 
-  it 'stores the procedure name', ->
-    expect(@subject.procedureName).toBe @procedureName
+    beforeEach ->
+        @procedureName = "procedureName"
+        @subject = new UnknownProcedureError @procedureName
 
-  it 'generates a meaningful error message', ->
-    expect(@subject.message).toBe 'Unknown procedure: procedureName.'
+    it "stores the procedure name", ->
+        expect(@subject.procedureName).toBe @procedureName
 
-  it 'returns the correct response code', ->
-    expect(@subject.responseCode).toBe ResponseCode.UNKNOWN_PROCEDURE
+    it "generates a meaningful error message", ->
+        expect(@subject.message).toBe "Unknown procedure: procedureName."
+
+    it "returns the correct response code", ->
+        expect(@subject.responseCode).toBe ResponseCode.UNKNOWN_PROCEDURE
