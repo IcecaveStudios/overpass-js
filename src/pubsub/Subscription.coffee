@@ -7,9 +7,13 @@ module.exports = class Subscription extends EventEmitter
         @_isSubscribed = false
         @_promise = bluebird.resolve()
 
-    enable: -> @_promise = @_promise.then => @_subscribe()
+    enable: ->
+        @_promise = bluebird.resolve() if @_promise.isRejected()
+        @_promise = @_promise.then => @_subscribe()
 
-    disable: -> @_promise = @_promise.then => @_unsubscribe()
+    disable: ->
+        @_promise = bluebird.resolve() if @_promise.isRejected()
+        @_promise = @_promise.then => @_unsubscribe()
 
     _subscribe: ->
         return bluebird.resolve() if @_isSubscribed
@@ -35,5 +39,4 @@ module.exports = class Subscription extends EventEmitter
             @_isSubscribed = true
             throw error
 
-    _message: (topic, payload) =>
-        @emit "message", topic, payload
+    _message: (topic, payload) => @emit "message", topic, payload
