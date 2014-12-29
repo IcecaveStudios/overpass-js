@@ -7,7 +7,6 @@ class Topic
 
     constructor: (@name) ->
         @promise = bluebird.resolve()
-        @state = "unsubscribed"
         @subscriptions = 0
 
 module.exports = class Subscriber extends EventEmitter
@@ -25,55 +24,40 @@ module.exports = class Subscriber extends EventEmitter
 
     subscribe: (topic) ->
         topic = @_topic topic
-        topic.subscriptions++
-
-        return topic.promise if topic.subscriptions > 1
-
-        state = topic.state
-        topic.state = "subscribing"
-
-        switch state
-            when "unsubscribed"
-                topic.promise = @_subscribe topic
-            when "unsubscribing"
-                topic.promise = topic.promise.then => @_subscribe topic
+        topic.promise = topic.promise.then => @_subscribe topic
 
     unsubscribe: (topic) ->
         topic = @_topic topic
-
-        return topic.promise if topic.subscriptions is 0
-
-        topic.subscriptions--
-
-        return topic.promise if topic.subscriptions > 0
-
-        state = topic.state
-        topic.state = "unsubscribing"
-
-        switch state
-            when "subscribed"
-                topic.promise = @_unsubscribe topic
-            when "subscribing"
-                topic.promise = topic.promise.then => @_unsubscribe topic
+        topic.promise = topic.promise.then => @_unsubscribe topic
 
     _topic: (name) -> @_topics[name] ?= new Topic name
 
     _subscribe: (topic) ->
+        isSubscribed = topic.subscriptions > 0
+        ++topic.subscriptions
+
+        return bluebird.resolve() if isSubscribed
+
         @driver
         .subscribe topic.name
-        .then => topic.state = "subscribed"
         .tap => @logger.debug 'Subscribed to topic "{topic}"', topic: topic.name
         .catch (error) =>
-            topic.state = "unsubscribed"
+            --topic.subscriptions
             throw error
 
     _unsubscribe: (topic) ->
+        return bluebird.resolve() if topic.subscriptions < 1
+
+        --topic.subscriptions
+
+        return bluebird.resolve() if topic.subscriptions > 0
+
         @driver
         .unsubscribe topic.name
-        .then => topic.state = "unsubscribed"
-        .tap => @logger.debug 'Unsubscribed from topic "{topic}"', topic: topic.name
+        .tap =>
+            @logger.debug 'Unsubscribed from topic "{topic}"', topic: topic.name
         .catch (error) =>
-            topic.state = "subscribed"
+            ++topic.subscriptions
             throw error
 
     _message: (topic, payload) =>

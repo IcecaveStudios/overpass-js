@@ -21,7 +21,6 @@ module.exports = class Subscription extends EventEmitter
             @subscriber.on "message.#{@topic}", @_message
         .catch (error) =>
             @_isSubscribed = false
-
             throw error
 
     _unsubscribe: ->
@@ -34,7 +33,6 @@ module.exports = class Subscription extends EventEmitter
             @subscriber.removeListener "message.#{@topic}", @_message
         .catch (error) =>
             @_isSubscribed = true
-
             throw error
 
     _message: (topic, payload) =>

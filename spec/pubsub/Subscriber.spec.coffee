@@ -43,8 +43,8 @@ describe "pubsub.Subscriber", ->
                 =>
                     expect(@driver.subscribe).toHaveBeenCalledWith "topic-a"
                     expect(@driver.subscribe).toHaveBeenCalledWith "topic-b"
-                    expect(@subject._topic("topic-a").state).toBe "subscribed"
-                    expect(@subject._topic("topic-b").state).toBe "subscribed"
+                    expect(@subject._topic("topic-a").subscriptions).toBe 1
+                    expect(@subject._topic("topic-b").subscriptions).toBe 1
                     done()
 
         it "only subscribes once per topic when called synchronously", (done) ->
@@ -67,7 +67,7 @@ describe "pubsub.Subscriber", ->
             @subject.unsubscribe("topic-a")
 
             @subject.subscribe("topic-a").then =>
-                expect(@subject._topic("topic-a").state).toBe "subscribed"
+                expect(@subject._topic("topic-a").subscriptions).toBe 1
                 done()
 
         it "logs the details", (done) ->
@@ -93,8 +93,8 @@ describe "pubsub.Subscriber", ->
                 =>
                     expect(@driver.unsubscribe).toHaveBeenCalledWith "topic-a"
                     expect(@driver.unsubscribe).toHaveBeenCalledWith "topic-b"
-                    expect(@subject._topic("topic-a").state).toBe "unsubscribed"
-                    expect(@subject._topic("topic-b").state).toBe "unsubscribed"
+                    expect(@subject._topic("topic-a").subscriptions).toBe 0
+                    expect(@subject._topic("topic-b").subscriptions).toBe 0
                     done()
 
         it "only unsubscribes when appropriate, when called synchronously", (done) ->
