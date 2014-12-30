@@ -48,11 +48,12 @@ module.exports = class AmqpSubscriberDriver extends EventEmitter
     _normalizeTopic: (topic) ->
         topic.replace(/\*/g, "#").replace /\?/g, "*"
 
-    _consume: -> @_consumer = @_consumer.then => @_doConsume()
+    _consume: -> @_consumer = @_consumer.then @_doConsume, @_doConsume
 
-    _cancelConsume: -> @_consumer = @_consumer.then => @_doCancelConsume()
+    _cancelConsume: ->
+        @_consumer = @_consumer.then @_doCancelConsume, @_doCancelConsume
 
-    _doConsume: ->
+    _doConsume: =>
         return bluebird.resolve() if @_consumerTag?
 
         consumer = @declarationManager.queue().then (queue) =>
@@ -65,7 +66,7 @@ module.exports = class AmqpSubscriberDriver extends EventEmitter
                 @_consumerTag = null
                 throw error
 
-    _doCancelConsume: ->
+    _doCancelConsume: =>
         return bluebird.resolve() unless @_consumerTag?
 
         consumerTag = @_consumerTag

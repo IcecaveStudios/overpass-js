@@ -24,15 +24,19 @@ module.exports = class Subscriber extends EventEmitter
 
     subscribe: (topic) ->
         topic = @_topic topic
-        topic.promise = topic.promise.then => @_subscribe topic
+        callback = => @_subscribe topic
+
+        topic.promise = topic.promise.then callback, callback
 
     unsubscribe: (topic) ->
         topic = @_topic topic
-        topic.promise = topic.promise.then => @_unsubscribe topic
+        callback = => @_unsubscribe topic
+
+        topic.promise = topic.promise.then callback, callback
 
     _topic: (name) -> @_topics[name] ?= new Topic name
 
-    _subscribe: (topic) ->
+    _subscribe: (topic) =>
         isSubscribed = topic.subscriptions > 0
         ++topic.subscriptions
 
@@ -45,7 +49,7 @@ module.exports = class Subscriber extends EventEmitter
             --topic.subscriptions
             throw error
 
-    _unsubscribe: (topic) ->
+    _unsubscribe: (topic) =>
         return bluebird.resolve() if topic.subscriptions < 1
 
         --topic.subscriptions
