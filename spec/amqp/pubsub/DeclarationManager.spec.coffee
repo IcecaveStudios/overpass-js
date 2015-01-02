@@ -64,7 +64,7 @@ describe "amqp.pubsub.DeclarationManager", ->
                 expect(actual).toBe "queue-name"
                 expect(@channel.assertQueue).toHaveBeenCalledWith null,
                         exclusive: true
-                        autoDelete: true
+                        autoDelete: false
                         durable: false
                 done()
 

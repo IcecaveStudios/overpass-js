@@ -21,6 +21,6 @@ module.exports = class DeclarationManager
         @_queue = bluebird.resolve \
             @channel.assertQueue null,
                 exclusive: true
-                autoDelete: true
+                autoDelete: false
                 durable: false
             .then (response) -> response.queue
