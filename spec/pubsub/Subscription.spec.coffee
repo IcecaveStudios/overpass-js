@@ -52,7 +52,7 @@ describe "pubsub.Subscription", ->
                 @subscriber.subscribe.andCallFake -> bluebird.resolve()
 
                 @subject.enable().then =>
-                    expect(@subject._isSubscribed).toBe true
+                    expect(@subject._state.isOn).toBe true
                     done()
 
     describe "disable()", ->
@@ -96,7 +96,7 @@ describe "pubsub.Subscription", ->
                 @subscriber.unsubscribe.andCallFake -> bluebird.resolve()
 
                 @subject.disable().then =>
-                    expect(@subject._isSubscribed).toBe false
+                    expect(@subject._state.isOn).toBe false
                     done()
 
     describe "_message()", ->

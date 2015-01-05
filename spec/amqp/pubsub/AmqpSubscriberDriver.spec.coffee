@@ -69,18 +69,18 @@ describe "amqp.pubsub.AmqpSubscriberDriver", ->
 
         it "starts consuming when subscriptions are added concurrently", (done) ->
             @subject.subscribe "topic-a"
-            @subject.subscribe "topic-b"
 
-            @subject._consumer.then =>
+            @subject.subscribe("topic-b").then =>
                 expect(@channel.consume).toHaveBeenCalledWith "queue-name", jasmine.any(Function), noAck: true
                 expect(@channel.consume.calls.length).toBe 1
                 expect(@subject._consumerTag).toBe "consumer-tag"
                 done()
 
         it "starts consuming when subscriptions are added sequentially", (done) ->
-            @subject.subscribe("topic-a").then => @subject.subscribe "topic-b"
-
-            @subject._consumer.then =>
+            @subject.subscribe("topic-a")
+            .then =>
+                @subject.subscribe "topic-b"
+            .then =>
                 expect(@channel.consume).toHaveBeenCalledWith "queue-name", jasmine.any(Function), noAck: true
                 expect(@channel.consume.calls.length).toBe 1
                 expect(@subject._consumerTag).toBe "consumer-tag"

@@ -1,38 +1,22 @@
 {EventEmitter} = require "events"
 bluebird = require "bluebird"
+AsyncBinaryState = require "../AsyncBinaryState"
 
 module.exports = class Subscription extends EventEmitter
 
     constructor: (@subscriber, @topic) ->
-        @_isSubscribed = false
-        @_promise = bluebird.resolve()
+        @_state = new AsyncBinaryState()
 
-    enable: -> @_promise = @_promise.then @_subscribe, @_subscribe
+    enable: ->
+        @_state.setOn =>
+            @subscriber.subscribe(@topic)
+            .then =>
+                @subscriber.on "message.#{@topic}", @_message
 
-    disable: -> @_promise = @_promise.then @_unsubscribe, @_unsubscribe
-
-    _subscribe: =>
-        return bluebird.resolve() if @_isSubscribed
-
-        @_isSubscribed = true
-
-        @subscriber.subscribe(@topic)
-        .then =>
-            @subscriber.on "message.#{@topic}", @_message
-        .catch (error) =>
-            @_isSubscribed = false
-            throw error
-
-    _unsubscribe: =>
-        return bluebird.resolve() unless @_isSubscribed
-
-        @_isSubscribed = false
-
-        @subscriber.unsubscribe(@topic)
-        .then =>
-            @subscriber.removeListener "message.#{@topic}", @_message
-        .catch (error) =>
-            @_isSubscribed = true
-            throw error
+    disable: ->
+        @_state.setOff =>
+            @subscriber.unsubscribe(@topic)
+            .then =>
+                @subscriber.removeListener "message.#{@topic}", @_message
 
     _message: (topic, payload) => @emit "message", topic, payload
