@@ -17,8 +17,13 @@ module.exports = class AsyncBinaryState
 
         @isOn = isOn
 
-        promise = bluebird.resolve handler?()
+        if handler?
+            method = bluebird.method handler
+        else
+            method = -> bluebird.resolve()
 
-        promise.catch => @isOn = not @isOn
+        method()
+        .catch (error) =>
+            @isOn = not isOn
 
-        promise
+            throw error
