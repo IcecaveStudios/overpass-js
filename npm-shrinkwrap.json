@@ -3,14 +3,14 @@
   "version": "0.2.2",
   "dependencies": {
     "bluebird": {
-      "version": "2.5.3",
+      "version": "2.8.1",
       "from": "bluebird@>=2.3.0 <3.0.0",
-      "resolved": "https://registry.npmjs.org/bluebird/-/bluebird-2.5.3.tgz"
+      "resolved": "https://registry.npmjs.org/bluebird/-/bluebird-2.8.1.tgz"
     },
     "enum": {
-      "version": "0.2.6",
+      "version": "0.2.7",
       "from": "enum@>=0.2.0 <0.3.0",
-      "resolved": "https://registry.npmjs.org/enum/-/enum-0.2.6.tgz"
+      "resolved": "https://registry.npmjs.org/enum/-/enum-0.2.7.tgz"
     },
     "escape-string-regexp": {
       "version": "1.0.2",

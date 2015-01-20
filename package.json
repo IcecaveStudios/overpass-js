@@ -5,7 +5,7 @@
   "homepage": "https://github.com/IcecaveStudios/overpass-js",
   "author": "Erin Millard",
   "contributors": [
-      "James Harris"
+    "James Harris"
   ],
   "keywords": [],
   "repository": {
@@ -34,6 +34,7 @@
     "winston": "^0.8"
   },
   "devDependencies": {
+    "amqplib": "^0.3.0",
     "coffee-script": "^1.8",
     "grunt": "^0.4",
     "grunt-cli": "^0.1",
