@@ -50,7 +50,8 @@ module.exports = class AmqpRpcClient
             return @_initializer
 
         @_initializer = @declarationManager.responseQueue().then (queue) =>
-            @channel.consume queue, (message) => @_recv message
+            handler = (message) => @_recv message
+            @channel.consume queue, handler, noAck: true
 
     _send: (request, id) ->
         payload = @serialization.serializeRequest request
