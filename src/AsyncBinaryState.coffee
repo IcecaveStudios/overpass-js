@@ -2,7 +2,9 @@ bluebird = require "bluebird"
 
 module.exports = class AsyncBinaryState
 
-    constructor: (@isOn = false) -> @_promise = bluebird.resolve()
+    constructor: (@isOn = false) ->
+        @_targetState = @isOn
+        @_promise = bluebird.resolve()
 
     setOn: (handler) => @set true, handler
 
@@ -13,9 +15,9 @@ module.exports = class AsyncBinaryState
         @_promise = @_promise.then callback, callback
 
     _set: (isOn, handler) =>
-        return bluebird.resolve() if isOn is @isOn
+        return bluebird.resolve() if isOn is @_targetState
 
-        @isOn = isOn
+        @_targetState = isOn
 
         if handler?
             method = bluebird.method handler
@@ -23,7 +25,8 @@ module.exports = class AsyncBinaryState
             method = -> bluebird.resolve()
 
         method()
+        .tap => @isOn = isOn
         .catch (error) =>
-            @isOn = not isOn
+            @_targetState = not isOn
 
             throw error

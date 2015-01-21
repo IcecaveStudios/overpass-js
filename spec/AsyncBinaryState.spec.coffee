@@ -1,4 +1,5 @@
 bluebird = require "bluebird"
+{Promise} = require "bluebird"
 requireHelper = require "./require-helper"
 AsyncBinaryState = requireHelper "AsyncBinaryState"
 
@@ -52,8 +53,21 @@ describe "AsyncBinaryState", ->
 
     describe "set", ->
 
-        it "sets the state to the supplied value", (done) ->
+        it "sets the state to the supplied value after the handler succeeds", (done) ->
             @subject.set(true).then =>
+                expect(@subject.isOn).toBe true
+                done()
+
+        it "does not change the state until the handler completes", (done) ->
+            resolve = null
+            p1 = new Promise (_resolve) -> resolve = _resolve
+            p2 = @subject.set true, -> p1
+
+            expect(@subject.isOn).toBe false
+
+            resolve()
+
+            p2.then =>
                 expect(@subject.isOn).toBe true
                 done()
 
