@@ -20,7 +20,7 @@ module.exports = class AsyncBinaryState
         @_targetState = isOn
 
         if handler?
-            method = bluebird.method handler
+            method = bluebird.method -> handler()
         else
             method = -> bluebird.resolve()
 
