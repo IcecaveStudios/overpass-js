@@ -128,6 +128,8 @@ module.exports = class AmqpSubscriber extends EventEmitter
                     payloadString = message.content.toString()
                     payload = @serialization.unserialize payloadString
                     @_emit topic, payload
+                    if payloadString.length > 256
+                        payloadString = payloadString.substring(0, 256) + '...'
                     @logger.debug 'Received {payload} from topic "{topic}"',
                         topic: topic
                         payload: payloadString
