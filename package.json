@@ -23,8 +23,8 @@
     "test": "grunt test"
   },
   "engines": {
-    "node": "^0.10",
-    "npm": "^2.1"
+    "node": ">= 0.10",
+    "npm": ">= 1"
   },
   "dependencies": {
     "bluebird": "^2.3",
@@ -48,10 +48,5 @@
     "grunt-open": "^0.2",
     "sleep": "^1.1"
   },
-  "licenses": [
-    {
-      "type": "MIT",
-      "url": "https://raw.github.com/IcecaveStudios/overpass-js/develop/LICENSE"
-    }
-  ]
+  "license": "MIT"
 }

@@ -4,6 +4,7 @@ bluebird = require "bluebird"
 DeclarationManager = require "./DeclarationManager"
 MessageSerialization = require "../../rpc/message/serialization/MessageSerialization"
 Request = require "../../rpc/message/Request"
+ResponseCode = require "../../rpc/message/ResponseCode"
 
 module.exports = class AmqpRpcClient
 
@@ -29,10 +30,16 @@ module.exports = class AmqpRpcClient
 
             @_send(request, id)
             .then (response) =>
+                responseBody = response.toString()
+                isSuccess = response.code is ResponseCode.SUCCESS
+
+                if isSuccess and responseBody.length > 256
+                    responseBody = responseBody.substring(0, 256) + '...'
+
                 @logger.debug 'RPC #{id} {request} -> {response}',
                     id: id
                     request: request.toString()
-                    response: response.toString()
+                    response: responseBody
                 response.extract()
             .catch TimeoutError, (e) =>
                 message =
