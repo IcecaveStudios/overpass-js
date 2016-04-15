@@ -11,8 +11,9 @@ describe "amqp.AmqpFactory", ->
 
     beforeEach ->
         @connection = jasmine.createSpyObj "connection", ["createChannel"]
+        @encoder = {}
         @logger = {}
-        @subject = new AmqpFactory @connection, @logger
+        @subject = new AmqpFactory @connection, @encoder, @logger
 
     it "stores the supplied dependencies", ->
         expect(@subject.connection).toBe @connection
@@ -53,7 +54,7 @@ describe "amqp.AmqpFactory", ->
             it "creates a new RPC client", (done) ->
                 @subject.createRpcClient()
                 .then (result) =>
-                    expect(result).toEqual new AmqpRpcClient @channel, null, null, null, @logger
+                    expect(result).toEqual new AmqpRpcClient @channel, null, null, null, @logger, @encoder
                     done()
 
             it "supports custom RPC timeouts", (done) ->

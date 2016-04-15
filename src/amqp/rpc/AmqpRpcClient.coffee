@@ -2,6 +2,7 @@ bluebird = require "bluebird"
 {Promise} = require "bluebird"
 {TimeoutError} = require "bluebird"
 DeclarationManager = require "./DeclarationManager"
+GzipEncoding = require "../../serialization/GzipEncoding"
 MessageSerialization = require "../../rpc/message/serialization/MessageSerialization"
 Request = require "../../rpc/message/Request"
 ResponseCode = require "../../rpc/message/ResponseCode"
@@ -14,6 +15,7 @@ module.exports = class AmqpRpcClient
         @declarationManager = new DeclarationManager(@channel)
         @serialization = new MessageSerialization()
         @logger = require "winston"
+        @encoding = new GzipEncoding()
     ) ->
         @_initializer = null
         @_requests = {}
@@ -61,7 +63,7 @@ module.exports = class AmqpRpcClient
             @channel.consume queue, handler, noAck: true
 
     _send: (request, id) ->
-        payload = @serialization.serializeRequest request
+        serializedRequest = @serialization.serializeRequest request
 
         promise = new Promise (resolve, reject) =>
             @_requests[id] = {resolve, reject}
@@ -72,11 +74,16 @@ module.exports = class AmqpRpcClient
             @declarationManager.responseQueue(),
             @declarationManager.requestQueue(request.name),
             @declarationManager.exchange(),
-            (responseQueue, requestQueue, exchange) =>
-                @channel.publish exchange, request.name, payload,
+            @encoding.encode(null, serializedRequest),
+            (responseQueue, requestQueue, exchange, [payload, encoding]) =>
+                properties =
                     replyTo: responseQueue
                     correlationId: id
                     expiration: timeout
+                if encoding?
+                    properties.content_encoding = encoding
+                @channel.publish exchange, request.name, payload, properties
+
         .catch (e) => @_requests[id].reject e
 
         promise
@@ -93,8 +100,16 @@ module.exports = class AmqpRpcClient
             return @logger.warn \
                 "Received RPC response with unknown correlation ID"
 
+        return new Promise (resolve, reject) =>
+            if not message.content_encoding?
+                return resolve @_deserialize id, message.content
+
+            return @encoding.decode(message.content_encoding, message.content).then (content) =>
+                resolve @_deserialize(id, content)
+
+    _deserialize: (id, content) ->
         try
-            response = @serialization.unserializeResponse(message.content)
+            response = @serialization.unserializeResponse(content)
             @_requests[id].resolve response
         catch e
             @_requests[id].reject e

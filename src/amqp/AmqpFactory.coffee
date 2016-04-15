@@ -5,7 +5,7 @@ Subscriber = require "../pubsub/Subscriber"
 
 module.exports = class AmqpFactory
 
-    constructor: (@connection, @logger = require "winston") ->
+    constructor: (@connection, @encoder, @logger = require "winston") ->
 
     createPublisher: ->
         @connection.createChannel()
@@ -19,4 +19,4 @@ module.exports = class AmqpFactory
     createRpcClient: (timeout = null) ->
         @connection.createChannel()
         .then (channel) =>
-            new AmqpRpcClient channel, timeout, null, null, @logger
+            new AmqpRpcClient channel, timeout, null, null, @logger, @encoder

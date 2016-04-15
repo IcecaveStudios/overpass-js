@@ -64,6 +64,7 @@ describe "amqp.rpc.AmqpRpcClient", ->
                         replyTo: "queue-name"
                         correlationId: @publishedId
                         expiration: @timeout * 1000
+                        content_encoding: 'gzip'
                     done()
 
             it "returns the result when no arguments are passed", (done) ->
@@ -75,6 +76,7 @@ describe "amqp.rpc.AmqpRpcClient", ->
                         replyTo: "queue-name"
                         correlationId: @publishedId
                         expiration: @timeout * 1000
+                        content_encoding: 'gzip'
                     done()
 
             it "can handle concurrent requests on first initialization", (done) ->
@@ -254,4 +256,5 @@ describe "amqp.rpc.AmqpRpcClient", ->
                     replyTo: "queue-name"
                     correlationId: @publishedId
                     expiration: @timeout * 1000
+                    content_encoding: 'gzip'
                 done()
