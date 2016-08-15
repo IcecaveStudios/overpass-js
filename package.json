@@ -1,11 +1,11 @@
 {
   "name": "overpass",
   "description": "A basic pub/sub and RPC system.",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "homepage": "https://github.com/IcecaveStudios/overpass-js",
   "author": "Erin Millard",
   "contributors": [
-      "James Harris"
+    "James Harris"
   ],
   "keywords": [],
   "repository": {
@@ -23,18 +23,18 @@
     "test": "grunt test"
   },
   "engines": {
-    "node": "^0.10",
-    "npm": "^2.1"
+    "node": ">= 0.10",
+    "npm": ">= 1"
   },
   "dependencies": {
-    "amqplib": "^0.3",
     "bluebird": "^2.3",
-    "enum": "^0.2",
+    "enum": "^2.0.1",
     "escape-string-regexp": "^1.0.2",
     "requireindex": "^1.1.0",
     "winston": "^0.8"
   },
   "devDependencies": {
+    "amqplib": "^0.3.0",
     "coffee-script": "^1.8",
     "grunt": "^0.4",
     "grunt-cli": "^0.1",
@@ -48,10 +48,5 @@
     "grunt-open": "^0.2",
     "sleep": "^1.1"
   },
-  "licenses": [
-    {
-      "type": "MIT",
-      "url": "https://raw.github.com/IcecaveStudios/overpass-js/develop/LICENSE"
-    }
-  ]
+  "license": "MIT"
 }
