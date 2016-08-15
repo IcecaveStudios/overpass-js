@@ -1,5 +1,10 @@
 # Overpass for Node.js Changelog
 
+### 0.3.0 (2016-08-15)
+
+* **[NEW]** Object-based subscription API
+* **[IMPROVED]** Truncate payloads over 256 bytes in log output
+
 ### 0.2.2 (2014-11-27)
 
 * **[FIXED]** `AmqpSubscriber` now uses the `no-ack` flag when consuming
