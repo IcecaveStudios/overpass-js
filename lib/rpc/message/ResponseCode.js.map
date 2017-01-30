@@ -1,10 +1,10 @@
 {
   "version": 3,
   "file": "ResponseCode.js",
-  "sourceRoot": "../../../src/rpc/message/",
+  "sourceRoot": "../../..",
   "sources": [
-    "ResponseCode.coffee"
+    "src/rpc/message/ResponseCode.coffee"
   ],
   "names": [],
-  "mappings": "AAAA;AAAA,MAAA,IAAA;;AAAA,EAAA,IAAA,GAAO,OAAA,CAAQ,MAAR,CAAP,CAAA;;AAAA,EAEA,MAAM,CAAC,OAAP,GAAqB,IAAA,IAAA,CACjB;AAAA,IAAA,OAAA,EAAS,CAAT;AAAA,IACA,KAAA,EAAO,EADP;AAAA,IAEA,eAAA,EAAiB,EAFjB;AAAA,IAGA,iBAAA,EAAmB,EAHnB;AAAA,IAIA,iBAAA,EAAmB,EAJnB;GADiB,CAFrB,CAAA;AAAA"
+  "mappings": ";AAAA;AAAA,MAAA;;EAAA,IAAA,GAAO,OAAA,CAAQ,MAAR;;EAEP,MAAM,CAAC,OAAP,GAAqB,IAAA,IAAA,CACjB;IAAA,OAAA,EAAS,CAAT;IACA,KAAA,EAAO,EADP;IAEA,eAAA,EAAiB,EAFjB;IAGA,iBAAA,EAAmB,EAHnB;IAIA,iBAAA,EAAmB,EAJnB;GADiB;AAFrB"
 }

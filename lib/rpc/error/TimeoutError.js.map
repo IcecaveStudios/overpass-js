@@ -1,10 +1,10 @@
 {
   "version": 3,
   "file": "TimeoutError.js",
-  "sourceRoot": "../../../src/rpc/error/",
+  "sourceRoot": "../../..",
   "sources": [
-    "TimeoutError.coffee"
+    "src/rpc/error/TimeoutError.coffee"
   ],
   "names": [],
-  "mappings": "AAAA;AAAA,MAAA,YAAA;IAAA;mSAAA;;AAAA,EAAA,MAAM,CAAC,OAAP,GAAuB;AAEnB,mCAAA,CAAA;;AAAa,IAAA,sBAAE,OAAF,GAAA;AAET,MAFU,IAAC,CAAA,UAAA,OAEX,CAAA;AAAA,MAAA,IAAC,CAAA,OAAD,GAAY,2BAAA,GAA2B,IAAC,CAAA,OAA5B,GAAoC,WAAhD,CAFS;IAAA,CAAb;;wBAAA;;KAFwC,MAA5C,CAAA;AAAA"
+  "mappings": ";AAAA;AAAA,MAAA,YAAA;IAAA;;;EAAA,MAAM,CAAC,OAAP,GAAuB;;;IAEN,sBAAC,OAAD;MAAC,IAAC,CAAA,UAAD;MAEV,IAAC,CAAA,OAAD,GAAW,2BAAA,GAA4B,IAAC,CAAA,OAA7B,GAAqC;IAFvC;;;;KAF2B;AAA5C"
 }

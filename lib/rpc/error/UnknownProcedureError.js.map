@@ -1,10 +1,10 @@
 {
   "version": 3,
   "file": "UnknownProcedureError.js",
-  "sourceRoot": "../../../src/rpc/error/",
+  "sourceRoot": "../../..",
   "sources": [
-    "UnknownProcedureError.coffee"
+    "src/rpc/error/UnknownProcedureError.coffee"
   ],
   "names": [],
-  "mappings": "AAAA;AAAA,MAAA,mCAAA;IAAA;mSAAA;;AAAA,EAAA,YAAA,GAAe,OAAA,CAAQ,yBAAR,CAAf,CAAA;;AAAA,EAEA,MAAM,CAAC,OAAP,GAAuB;AAEnB,4CAAA,CAAA;;AAAa,IAAA,+BAAE,aAAF,GAAA;AACT,MADU,IAAC,CAAA,gBAAA,aACX,CAAA;AAAA,MAAA,IAAC,CAAA,OAAD,GAAY,qBAAA,GAAqB,IAAC,CAAA,aAAtB,GAAoC,GAAhD,CAAA;AAAA,MACA,IAAC,CAAA,YAAD,GAAgB,YAAY,CAAC,iBAD7B,CADS;IAAA,CAAb;;iCAAA;;KAFiD,MAFrD,CAAA;AAAA"
+  "mappings": ";AAAA;AAAA,MAAA,mCAAA;IAAA;;;EAAA,YAAA,GAAe,OAAA,CAAQ,yBAAR;;EAEf,MAAM,CAAC,OAAP,GAAuB;;;IAEN,+BAAC,aAAD;MAAC,IAAC,CAAA,gBAAD;MACV,IAAC,CAAA,OAAD,GAAW,qBAAA,GAAsB,IAAC,CAAA,aAAvB,GAAqC;MAChD,IAAC,CAAA,YAAD,GAAgB,YAAY,CAAC;IAFpB;;;;KAFoC;AAFrD"
 }

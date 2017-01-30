@@ -1,10 +1,10 @@
 {
   "version": 3,
   "file": "InvalidMessageError.js",
-  "sourceRoot": "../../../src/rpc/error/",
+  "sourceRoot": "../../..",
   "sources": [
-    "InvalidMessageError.coffee"
+    "src/rpc/error/InvalidMessageError.coffee"
   ],
   "names": [],
-  "mappings": "AAAA;AAAA,MAAA,iCAAA;IAAA;mSAAA;;AAAA,EAAA,YAAA,GAAe,OAAA,CAAQ,yBAAR,CAAf,CAAA;;AAAA,EAEA,MAAM,CAAC,OAAP,GAAuB;AAEnB,0CAAA,CAAA;;AAAa,IAAA,6BAAE,OAAF,GAAA;AAAc,MAAb,IAAC,CAAA,UAAA,OAAY,CAAA;AAAA,MAAA,IAAC,CAAA,YAAD,GAAgB,YAAY,CAAC,eAA7B,CAAd;IAAA,CAAb;;+BAAA;;KAF+C,MAFnD,CAAA;AAAA"
+  "mappings": ";AAAA;AAAA,MAAA,iCAAA;IAAA;;;EAAA,YAAA,GAAe,OAAA,CAAQ,yBAAR;;EAEf,MAAM,CAAC,OAAP,GAAuB;;;IAEN,6BAAC,OAAD;MAAC,IAAC,CAAA,UAAD;MAAa,IAAC,CAAA,YAAD,GAAgB,YAAY,CAAC;IAA3C;;;;KAFkC;AAFnD"
 }
