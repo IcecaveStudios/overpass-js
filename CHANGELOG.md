@@ -1,5 +1,9 @@
 # Overpass for Node.js Changelog
 
+## 0.3.1 (2017-01-30)
+
+- **[MAINTENANCE]** Updated dependencies and other repository maintenance.
+
 ## 0.3.0 (2016-08-15)
 
 - **[NEW]** Object-based subscription API
