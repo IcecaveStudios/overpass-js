@@ -10,7 +10,7 @@ deploy:
     provider: npm
     email: james.harris@icecave.com.au
     api_key:
-        secure: Oq5qD0dE2smboD2+cgrCA7C/l8w8nV1PY6Zer0gVy0lTOQY9hnURZ38xsEcuXt297ntFrOu4GOyKR6sheN2O9GtW1eatJips7RIW953c1OaKOMCY+J4LMTPk9kA9HJsIkr8iTg7UrsMb4v5qWjDPYF4KGmggWVcz1ALC5hdyQcA=
+         secure: "1BZdwy93MPeagxO0e7mWX4mUWUN0wkX7D/1sBrZyp6ZTG3vnJf98HwQSdiUIFe1cYvID1PrWhdM+qhKNYfQN4rKbgPbbxJwV/Ue5UHM6GI4KVrovCIlPRCo3aYA9mVudGkXK4xHhG225tpmUYgIKlCkAj+pzpxMzzyOxvU/7Aa0="
     on:
         repo: IcecaveStudios/overpass-js
         tags: true
